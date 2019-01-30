@@ -1,0 +1,47 @@
+ErrorDocument 404 /error/
+ErrorDocument 400 /400.php
+Options +ExecCGI
+
+#ExpiresActive on
+#ExpiresDefault "access plus 3 months"
+#ExpiresByType image/jpeg "access plus 1 day"
+#ExpiresByType image/gif "access plus 3 months"
+#ExpiresByType image/png "access plus 3 months"
+#ExpiresByType text/html "now"
+
+#SetEnv environment dev
+#SetEnv environment test
+
+
+RewriteEngine on
+Options +FollowSymlinks
+RewriteBase /
+
+    AddEncoding gzip .gz
+    RewriteCond %{HTTP:Accept-encoding} !gzip [OR]
+    RewriteCond %{HTTP_USER_AGENT} Safari [OR]
+    RewriteCond %{HTTP_USER_AGENT} Konqueror
+    RewriteRule ^(.*)\.gz(\?.+)?$ $1 [QSA,L]
+
+    Header append Vary User-Agent
+    <FilesMatch .*\.js.gz$>
+		ForceType text/javascript
+		Header set Content-Encoding: gzip
+		Header set Cache-control: public
+		Header set ExpiresDefault "access plus 10 years"
+    </FilesMatch>
+    <FilesMatch .*\.css.gz$>
+		ForceType text/css
+		Header set Content-Encoding: gzip
+		Header set Cache-control: public
+		Header set ExpiresDefault "access plus 10 years"
+    </FilesMatch>
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([a-z0-9_]*)(/*)([a-z0-9_]*)(/*)([a-z0-9_]*)(/*)([a-z0-9_]*)(/*)$ index.php?deep1=$1&deep2=$3&deep3=$5&deep4=$7 [L,QSA]
+#SSLRequireSSL
+
+php_value display_errors 1
+php_value display_startup_errors 1
+php_value error_reporting E_ALL
