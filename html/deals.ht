@@ -1,0 +1,3070 @@
+{head}
+{main_top}
+
+<!-- BEGIN form -->
+
+<div id="deals_header">
+    <div class="line">
+        <input id="filters_show" type="checkbox" name="tabs" checked show="client_frm" hide="legal_frm">
+        <label for="filters_show" title="Вкладка 1"><img src="{IMG_URL}filter.png">Фильтры</label>
+
+
+        <div id="buttons">
+            <a href="{MAIN_URL}deals/deals/?detect=ADD&type_id=1">
+                <img src="{IMG_URL}tour_add.png">
+            </a>
+            <a href="{MAIN_URL}deals/deals?detect=ADD&type_id=2">
+                <img src="{IMG_URL}hotel_add.png">
+            </a>
+            <a href="{MAIN_URL}deals/deals?detect=ADD&type_id=3">
+                <img src="{IMG_URL}ticket_add.png">
+            </a>
+            <a href="{MAIN_URL}deals/deals?detect=ADD&type_id=4">
+                <img src="{IMG_URL}tur2_add.png">
+            </a>
+
+        </div>
+    </div>
+    <div class="line">
+
+
+        <form id="filters_form" method="POST" action="{MAIN_URL}deals/deals">
+
+
+            <table id="filters_table">
+                <tr>
+                    <td>
+                        Номер договора: <br><input type="text" name="f_deal_id" value="{F_DEAL_ID}">
+                    </td>
+                    <td>
+                        Дата договора с: <br><input type="date" name="f_deal_date_begin" value="{F_DEAL_DATE_BEGIN}">
+                    </td>
+                    <td>
+                        Дата договора по:<br> <input type="date" name="f_deal_date_end" value="{F_DEAL_DATE_END}">
+                    </td>
+
+                </tr>
+                <tr>
+                    <td>
+                        ФИО клиента: <br><input type="text" name="f_deal_client_fio" value="{F_DEAL_CLIENT_FIO}">
+                    </td>
+                    <td>
+                        Дата вылета c: <br><input type="date" name="f_deal_start_date_begin"
+                                                  value="{F_DEAL_START_DATE_BEGIN}">
+                    </td>
+                    <td>
+                        Дата вылета по: <br><input type="date" name="f_deal_start_date_end"
+                                                   value="{F_DEAL_START_DATE_END}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Статус: <br>
+                        <select name="f_deal_status_id" id="f_deal_status_id" placeholder="Выберите статус">
+                            <option value="-1">Все статусы</option>
+                            {F_DEAL_STATUSES}</select>
+                    </td>
+                    <td>
+                        <submit id="clearForm">Очистить фильтры</submit>
+
+                    </td>
+                    <td>
+                        <button type="submit">Поиск</button>
+                    </td>
+                </tr>
+            </table>
+            <input type="hidden" name="f_deal_rows_num" id="f_deal_rows_num" value="{F_DEAL_ROW_NUM}">
+            <input type="hidden" name="detect" value="SEARCH">
+            <input type="hidden" name="orderby" id="orderby" value="{F_ORDER_BY}">
+
+
+        </form>
+    </div>
+</div>
+
+<div class="main_form">
+    <div class="page_name">
+        СДЕЛКИ
+    </div>
+
+    <div class="row_count">
+        Сортировать по:<select name="orderby" onchange='$("#orderby").val(this.value); filters_form.submit()'>
+        <option></option>
+        <option value="deal_id">№ сделки по возрастанию</option>
+        <option  value="deal_id desc">№ сделки по убыванию</option>
+        <option value="d.start_date">Дата начала возрастанию</option>
+        <option  value="d.start_date desc">Дата начала по убыванию</option>
+        <option value="d.end_date">Дата окончания по возрастанию</option>
+        <option  value="d.end_date desc">Дата окончания по убыванию</option>
+        </select>
+        <img src="{IMG_URL}row_num.png"><span class="row_count_word">Показать:</span>
+        <input id="row_num1" type="radio" value="10" onchange='$("#f_deal_rows_num").val(this.value); filters_form.submit()'>
+        <label for="row_num1" title="Вкладка 1">10</label>
+        <input id="row_num2" type="radio"  value="20" onchange='$("#f_deal_rows_num").val(this.value); filters_form.submit()'>
+        <label for="row_num2" title="Вкладка 1">20</label>
+        <input id="row_num3" type="radio" value="50" onchange='$("#f_deal_rows_num").val(this.value); filters_form.submit()'>
+        <label for="row_num3" title="Вкладка 1">50</label>
+
+
+
+    </div>
+    <div class="main_table">
+        <table id="deals_table">
+
+        <thead>
+        <th param="deal_id" class="both">
+            Сделка
+        </th>
+        <th param="d.status_id" class="both">
+            Статус
+        </th>
+        <th param="d.create_date" class="both">
+            Дата тура</b>
+        </th>
+        <th>
+            Заказчик
+        </th>
+
+        <th>
+            <b>Услуга</b>
+        </th>
+        <th param="payed_sum_rub" class="both">
+            <b>Оплачено</b> <img src="{IMG_URL}calc.png" id="show_profit">
+        </th>
+        <th param="agent_payed_sum_rub" class="both">
+            <b>Оплачено агенством</b>
+        </th>
+        <th param="full_sum-agent_full_sum" class="both">
+            <b>Прибыль</b>
+        </th>
+
+        </thead>
+        <tbody>
+        <!-- BEGIN list -->
+        <tr ondblclick="document.location.href = '{MAIN_URL}deals/deals?detect=EDIT&id={DEAL_ID}'">
+
+            <td {DEAL_ROW_COLOR}>
+                 <a href="{MAIN_URL}deals/deals?detect=EDIT&id={DEAL_ID}">№ {DEAL_ID}</a><br>
+                от {DEAL_DATE} {IMPORTANT}
+            </td>
+            <td {DEAL_ROW_COLOR}>{DEAL_STATUS}</td>
+            <td {DEAL_ROW_COLOR}> {DEAL_START_DATE}<br>
+                {DEAL_END_DATE}
+            </td>
+            <td {DEAL_ROW_COLOR}>
+                {DEAL_PAYER}
+            </td>
+            <td {DEAL_ROW_COLOR}>
+                {DEAL_TYPE}:{DEAL_COUNTRY}, {DEAL_CITY}
+            </td>
+
+
+            <td {DEAL_ROW_COLOR}>
+                <font color="{DEAL_SUM_COLOR}"><b>{DEAL_PAYED_SUM} </b> <br>({DEAL_FULL_SUM})</font>
+            </td>
+            <td {DEAL_ROW_COLOR}>
+                <font color="{DEAL_AGENT_SUM_COLOR}"><b>{DEAL_AGENT_PAYED_SUM} </b> <br>({DEAL_AGENT_FULL_SUM})</font>
+            </td>
+            <td {DEAL_ROW_COLOR}>
+                <b>{DEAL_PROFIT}</b>
+            </td>
+        </tr>
+        <!-- END list -->
+        </tbody>
+        <tfoot>
+        <tr>
+            <td colspan="4" class="pages_block">
+                {NAVIGATION}
+            </td>
+            <td colspan="2" class="table_summary">ИТОГО ДОЛГ:</td>
+
+            <td class="summary_val">{CLIENT_FULL_DEBT}</td>
+            <td class="summary_val">{AGENT_FULL_DEBT}</td>
+
+        </tr>
+        </tfoot>
+    </table>
+</div>
+</div>
+
+
+<span class="tip">{SHOW_ALL_COMMENT}</span>
+
+
+<script type="text/javascript">
+
+    $("#clearForm").on("click", function () {
+        $("#filters_form").trigger('reset');
+
+
+    })
+/*
+    $("#deals_table").on("click", "th.both", function () {
+        if ($(this).hasClass("DESC")) {
+            $(".main_table th").removeClass("ASC").removeClass("DESC");
+            $(this).removeClass("DESC").addClass("ASC");
+            tableSort($(this).attr("param"), "DESC");
+
+        }
+        else {
+            $(".main_table th").removeClass("ASC").removeClass("DESC");
+            $(this).removeClass("ASC").addClass("DESC");
+            tableSort($(this).attr("param"), "ASC");
+        }
+
+        //tableSort($(this).attr("id"),"ASC");
+
+    });*/
+
+    //$("")
+
+
+    function tableSort(param, type) {
+        $.ajax({
+            type: 'POST',
+            url: '{MAIN_URL}deals/deals',
+            data: {
+                detect: "SORT",
+                orderby: param + " " + type
+            },
+            success: function (msg) {
+                $(".main_table table tbody").html("");
+                $(".main_table table tbody").html(msg);
+                $("#orderby").val(param + " " + type);
+
+            }
+        })
+    }
+
+
+    $("#show_profit").click(function () {
+        if ($("#deals_table thead th:nth-child(7)").is(":visible")) {
+            $("#deals_table thead th:nth-child(7), #deals_table tbody td:nth-child(7)").hide();
+            $("#deals_table thead th:nth-child(8), #deals_table tbody td:nth-child(8)").hide();
+        } else {
+            $("#deals_table thead th:nth-child(7), #deals_table tbody td:nth-child(7)").show();
+            $("#deals_table thead th:nth-child(8), #deals_table tbody td:nth-child(8)").show();
+        }
+
+    })
+    $(document).ready(function () {
+        $("#filters_form").hide();
+        $("#filters_form input").each(function () {
+            if ($(this).val().length && $(this).val() != "SEARCH" && $("#f_deal_status_id").val() > 0) {
+                $("#filters_form").show();
+            }
+
+        });
+
+        /*if ($('#deals_table tr').length > 1)
+         $('#deals_table').tablesorter({ headers: { 7:{sorter: false}, 8:{sorter: false}, 9:{sorter: false}}});*/
+        $("submit").button();
+        $("button").button();
+
+        $("#filters_show").click(function () {
+            if ($("#filters_form").is(":visible"))
+                $("#filters_form").hide();
+            else
+                $("#filters_form").show();
+        });
+
+    });
+
+</script>
+<!-- END form -->
+<!-- BEGIN client_form -->
+<script>
+    var deal_id = "{DEAL_ID}";
+    var service_num = 1;
+    var services = new Array();
+    /*function update_deal{
+
+     }*/
+</script>
+<div id="notify" class="notify">
+    <div class="hide_notify">закрыть</div>
+    Внимание! <br>
+</div>
+<form id="frm" action="{MAIN_URL}deals/deals" method="post" onSubmit="return formValidate(this)" id="deal_form">
+
+    <!-- BEGIN new_deal -->
+    <div><h2> Новая сделка </h2></div>
+    <!-- END new_deal -->
+    <!-- BEGIN edit_deal -->
+    <div><h2> Сделка № {DEAL_ID} </h2></div>
+    <!-- END edit_deal -->
+    <!--<div ><center><h4>Статус: {STATUS_NAME}</h1></center></div>-->
+    <fieldset class="deal_element">
+        <legend>Клиенты</legend>
+        <submit id="client_select_button" class="buttons">Выбрать клиента</submit>
+        <br><br>
+
+        <div id='clientlist' style="float: center;"></div>
+        <table class="tur_table" id="client_table">
+            <thead>
+            <th>ФИО</th>
+            <th>Дата рождения</th>
+            <th>Телефон</th>
+            <th>Загран паспорт</th>
+            <th>Турист</th>
+            <th>Плательщик</th>
+            <th></th>
+            </thead>
+            <tbody id="client_body">
+            {CLIENTS}
+
+            <!-- BEGIN client_list -->
+            <tr id="client_list_{CLIENT_ID}" ondblclick="client_edit({CLIENT_ID})">
+                <td>{CLIENT_FIO}</td>
+                <td>{CLIENT_BIRTHDATE}</td>
+                <td>{CLIENT_PHONE}</td>
+                <td>{CLIENT_PASS_NUM} Выдан {CLIENT_PASS_ISSUE}<br>
+                    Действителен до: {CLIENT_PASS_END_DATE}
+                </td>
+                <td><input type="checkbox" {CLIENT_TOURIST} name="tourist[{CLIENT_ID}]"></td>
+                <td><input type="radio" {CLIENT_PAYER} name="payer_id" id="payer" value="{CLIENT_ID}"></td>
+                <td><a href="#" onClick="client_del({DEAL_ID}, {CLIENT_ID})"><img src="{IMG_URL}del.gif"></a></td>
+            </tr>
+            <!-- END client_list -->
+            </tbody>
+        </table>
+    </fieldset>
+
+    <!-- BEGIN tour_block -->
+    <fieldset class="deal_element">
+        <legend>{DEAL_TYPE}</legend>
+        <table width=100%>
+            <tr>
+                <td>
+                    Город вылета:<br>
+                    <select id="departure_city" name="departure_city_id" class="demo-default"
+                            placeholder="Выберите город вылета...">{DEP_CITIES}</select>
+                </td>
+                <td>
+                    Дата начала :<br>
+                    <input type="date" name="start_date" id="start_date" value="{START_DATE}">
+                </td>
+                <td>
+                    Количество ночей <br>
+                    <input type="number" name="nights" id="nights" min="1" value="{NIGHTS}">
+                </td>
+                <td>
+                    Дата окончания <br>
+                    <input type="date" name="end_date" id="end_date" readonly value="{END_DATE}">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Оператор:
+                    <select id="operator" name="operator_id" class="demo-default" placeholder="Выберите оператора...">{OPERATORS}</select>
+                </td>
+                <td>
+                    Страна:
+                    <select id="countries" name="country_id" class="demo-default" placeholder="Выберите страну...">{COUNTRIES}</select>
+                </td>
+                <td>
+                    Город:
+                    <select id="cities" name="city_id" class="demo-default"
+                            placeholder="Выберите город...">{CITIES}</select>
+                </td>
+                <td>
+                    Отель:
+                    <select id="hotels" name="hotel_id" class="demo-default"
+                            placeholder="Выберите отель...">{HOTELS}</select>
+                </td>
+
+            </tr>
+            <tr>
+                <td>
+                    Количество номеров:<br>
+                    <input type="number" name="rooms" id="rooms" min="1" placeHolder="Введите кол-во..."
+                           value='{ROOMS}'>
+                </td>
+                <td>
+                    Тип комнаты:
+                    <select id="room_type" name="room_type">{ROOMTYPES}</select>
+                </td>
+                <td>
+                    Тип питания:
+                    <select id="food_type" name="food_type">{FOODTYPES}</select>
+                </td>
+                <td>
+                    Тип размещения:
+                    <select id="place_type" name="place_type">{PLACETYPES}</select>
+                </td>
+            </tr>
+        </table>
+
+
+    </fieldset>
+    <!-- END tour_block -->
+
+    <!-- BEGIN hotel_block -->
+
+
+    <!-- END hotel_block -->
+
+    <!-- BEGIN ticket_block -->
+
+    <fieldset class="deal_element">
+        <legend>Билет</legend>
+
+        <div class="services_body" id="ticketAddBlock">
+            <div class="services_item">
+                Оператор:
+                <select id="operator" name="operator_id" class="demo-default" placeholder="Выберите оператора...">
+                    <option value=""></option>
+                    {OPERATORS}</select>
+            </div>
+            <div class="services_item">
+                <label for="departure_date">Дата вылета: </label><br>
+                <input type="date" id="departure_date" name="departure_date" value="{DEP_DATE}">
+            </div>
+            <div class="services_item">
+                <label for="ticket_num">Количество билетов:</label><br>
+                <input type="number" name="ticket_num" value="{TICKET_NUM}">
+            </div>
+        </div>
+        <div class="services_body">
+            <div class="services_item">
+                Страна вылета:
+                <select id="dep_countries" name="dep_country_id" class="demo-default" placeholder="Выберите страну...">
+                    <option value=""></option>
+                    {DEP_COUNTRIES}</select>
+            </div>
+            <div class="services_item">
+                Город вылета:
+                <select id="dep_cities" name="dep_city_id" class="demo-default" placeholder="Выберите город...">{DEP_CITIES}</select>
+            </div>
+            <div class="services_item">
+                Аэропорт вылета:
+                <select id="dep_airports" name="dep_airport_id" class="demo-default" placeholder="Выберите аэропорт...">{DEP_AIRPORTS}</select>
+            </div>
+            <br>
+        </div>
+        <div class="services_body">
+            <div class="services_item">
+                Страна прилета:
+                <select id="arr_countries" name="arrival_country_id" class="demo-default"
+                        placeholder="Выберите страну...">
+                    <option value=""></option>
+                    {ARR_COUNTRIES}</select>
+            </div>
+            <div class="services_item">
+                Город прилета:
+                <select id="arr_cities" name="arrival_city_id" class="demo-default" placeholder="Выберите город...">{ARR_CITIES}</select>
+            </div>
+            <div class="services_item">
+                Аэропорт прилета:
+                <select id="arr_airports" name="arrival_airport_id" class="demo-default"
+                        placeholder="Выберите аэропорт...">{ARR_AIRPORTS}</select>
+            </div>
+        </div>
+    </fieldset>
+    <!-- END ticket_block -->
+
+
+    <!-- BEGIN multi_block -->
+    <fieldset class="deal_element" id="multi_tour">
+        <legend>Мультитур</legend>
+        <!-- BEGIN service_add -->
+        <select name="service_type" id="serviceType">
+            <option value="1">Тур</option>
+            <option value="2">Отель</option>
+            <option value="3">Билет</option>
+            <option value="4">Виза</option>
+        </select>
+        <submit id="serviceAdd">
+            Добавить услугу
+        </submit>
+        <!-- END service_add -->
+        <!--{TOUR_TABLE}
+	{TICKET_TABLE}
+	{HOTEL_TABLE}-->
+
+        <table class="hist" id="servicesList">
+            <thead>
+            <th></th>
+            <th>Наименование</th>
+            <th>Оплата клиента</th>
+            <th>Оплата турфирмы</th>
+            </thead>
+            <tbody>
+            {SERVICE_TABLE}
+
+            </tbody>
+        </table>
+
+        <div class="services_body" id="multiAdd">
+
+        </div>
+
+
+    </fieldset>
+
+
+    <script type="text/javascript">
+        function set_deals_sums() {
+            var client_deal_sum = 0, agent_deal_sum = 0;
+            //services
+            /*$(".multi_ticket_row").each(function(){
+
+             }*/
+
+            $(".r_client_service_cost").each(function () {
+                client_deal_sum += parseFloat($(this).val());
+
+
+            });
+            $(".r_agent_service_cost").each(function () {
+                agent_deal_sum += parseFloat($(this).val());
+
+            });
+
+            $("#sum_rub").val(client_deal_sum);
+            $("#agent_sum_rub").val(agent_deal_sum);
+            $("#sum_rub").trigger("change");
+            $("#agent_sum_rub").trigger("change");
+
+
+        }
+        //Редактирвоание услуг по дабл клику
+        $("#multi_tour").on("dblclick", ".multi_tour_row", function () {
+            th = $(this);
+            $("#multiAdd").html("");
+            $("#multiAdd").append($("#tourAddBlock").html());
+            createSelectize(th.find("#r_city_id").val(), th.find("#r_hotel_id").val());
+            operators.setValue(th.find("#r_operator_id").val());
+
+            countries.setValue(th.find("#r_country_id").val());
+            foodtypes.setValue(th.find("#r_food_type").val());
+            roomtypes.setValue(th.find("#r_room_type").val());
+            placetypes.setValue(th.find("#r_place_type").val());
+            $("#rooms").val(th.find("#r_rooms").val());
+            $("#nights").val(th.find("#r_nights").val());
+            $("#start_date").val(th.find("#r_start_date").val());
+            $("#end_date").val(th.find("#r_end_date").val());
+            $("#tour_id").val(th.find("#r_tour_id").val());
+            $("#client_service_cost").val(th.find(".r_client_service_cost").val());
+            $("#agent_service_cost").val(th.find(".r_agent_service_cost").val());
+            $("#hotelAddButton").html("Сохранить изменения");
+            service_num = (th.find("td:first").html());
+            //$(this).html("");    
+            //$(this).append($("#tourAddBlock").html());
+        });
+
+        $("#multi_tour").on("dblclick", ".multi_ticket_row", function () {
+            $("#multiAdd").html("");
+            $("#multiAdd").append($("#ticketAddBlock").html());
+            th = $(this);
+            createSelectize(0, 0, th.find("#r_arr_country_id").val(), th.find("#r_dep_city_id").val(), th.find("#r_dep_airport_id").val(), th.find("#r_arr_city_id").val(), th.find("#r_arr_airport_id").val());
+            operators.setValue(th.find("#r_operator_id").val());
+            console.log(th.find("#r_dep_country_id").val());
+            dep_countries.setValue(th.find("#r_dep_country_id").val());
+            arr_countries.setValue(th.find("#r_arr_country_id").val());
+            $("#departure_date").val(th.find("#r_departure_date").val());
+            $("#ticket_num").val(th.find("#r_ticket_num").val());
+            $("#ticket_id").val(th.find("#r_ticket_id").val());
+            $("#client_service_cost").val(th.find(".r_client_service_cost").val());
+            $("#agent_service_cost").val(th.find(".r_agent_service_cost").val());
+            $("#ticketAddButton").html("Сохранить изменения");
+            service_num = (th.find("td:first").html());
+
+        });
+
+        $("#multi_tour").on("dblclick", ".multi_hotel_row", function () {
+            $("#multiAdd").html("");
+            $("#multiAdd").append($("#hotelAddBlock").html());
+            createSelectize($(this).find("#r_city_id").val(), $(this).find("#r_hotel_id").val());
+            operators.setValue($(this).find("#r_operator_id").val());
+            th = $(this);
+            countries.setValue(th.find("#r_country_id").val());
+            foodtypes.setValue(th.find("#r_food_type").val());
+            roomtypes.setValue(th.find("#r_room_type").val());
+            placetypes.setValue(th.find("#r_place_type").val());
+            $("#rooms").val(th.find("#r_rooms").val());
+            $("#nights").val(th.find("#r_nights").val());
+            $("#start_date").val(th.find("#r_start_date").val());
+            $("#end_date").val(th.find("#r_end_date").val());
+            $("#tour_id").val(th.find("#r_tour_id").val());
+            $("#hotelAddButton").html("Сохранить изменения");
+            $("#client_service_cost").val(th.find(".r_client_service_cost").val());
+            $("#agent_service_cost").val(th.find(".r_agent_service_cost").val());
+            service_num = (th.find("td:first").html());
+
+
+            //hotels.setValue($(this).find("#r_hotel_id").val()).delay( 1600 );
+
+        });
+
+        $("#serviceAdd").on("click", function () {
+            service_type = $("#serviceType").val();
+            if (service_type == 1) appendBlock = "#tourAddBlock";
+            if (service_type == 2) appendBlock = "#hotelAddBlock";
+            if (service_type == 3) appendBlock = "#ticketAddBlock"
+            if (service_type == 4) appendBlock = "#visaAddBlock"
+
+            $("#multiAdd").html("");
+            $("#multiAdd").append($(appendBlock).html());
+            createSelectize();
+
+        })
+        $(".services_body").on("click", "#hotelAddButton", function () {
+            service_type = $(this).attr("service_type");
+            tour_id = $("#tour_id").val();
+            if (service_type == 1) {
+                departure_city_id = $("#departure_city").val();
+                departure_city = $("#departure_city option:selected").html();
+            }
+            /*departure_city_id = $("#departure_city").val();
+             departure_city = $("#departure_city option:selected").html();*/
+            start_date = $("#start_date").val();
+            end_date = $("#end_date").val();
+            nights = $("#nights").val();
+            operator_id = $("#operator").val();
+            operator = $("#operator option:selected").html();
+            country_id = $("#countries").val();
+            country = $("#countries option:selected").html();
+            city_id = $("#cities").val();
+            city = $("#cities option:selected").html();
+            hotel_id = $("#hotels").val();
+            hotel = $("#hotels option:selected").html();
+            room_type = $("#room_type").val();
+            food_type = $("#food_type").val();
+            place_type = $("#place_type").val();
+            rooms = $("#rooms").val();
+            client_service_cost = $("#client_service_cost").val();
+            agent_service_cost = $("#agent_service_cost").val();
+            var client_service_payed = 0, agent_service_payed = 0;
+
+            if (tour_id > 0) {
+                //$("#servicesList tbody .multi_ticket_row_"+ticket_id).remove();
+                if (service_type == 1) {
+                    $("#servicesList tbody #multi_tour_row_" + tour_id).remove();
+                }
+                else if (service_type == 2)
+                    $("#servicesList tbody #multi_hotel_row_" + tour_id).remove();
+                $.ajax({
+                    type: 'POST',
+                    url: '{MAIN_URL}deals/deals',
+                    data: {
+                        detect: "SERVICE_UPDATE",
+                        type: service_type,
+                        tour_id: tour_id,
+                        start_date: start_date,
+                        nights: nights,
+                        end_date: end_date,
+                        rooms: rooms,
+                        operator_id: operator_id,
+                        country_id: country_id,
+                        city_id: city_id,
+                        hotel_id: hotel_id,
+                        room_type: room_type,
+                        food_type: food_type,
+                        place_type: place_type
+                    },
+                    success: function () {
+
+                    }
+                })
+            } else {
+                tour_id = service_num;
+            }
+
+            row_id = tour_id;
+            if (service_type == 1) {
+                new_row = "<tr class=\"multi_tour_row\" id=\"multi_tour_row_" + tour_id + "\" service_id=" + tour_id + ">";
+                new_row += "<td>" + service_num + "</td>";
+                new_row += "<td><b>Тур</b> из " + departure_city + " в " + hotel + "(" + city + "," + country + ") с " + start_date + " по  " + end_date + "</td>";
+                new_row += "<input type=hidden id=r_departure_city_id name=t_departure_city_id[] value=" + departure_city_id + ">";
+                pref = "t_";
+            } else if (service_type == 2) {
+                new_row = "<tr class=\"multi_hotel_row\" id=\"multi_hotel_row_" + tour_id + "\" service_id=" + tour_id + ">";
+                new_row += "<td>" + service_num + "</td>";
+                new_row += "<td><b>Отель</b> " + hotel + "(" + city + "," + country + ") с " + start_date + " по  " + end_date + "</td>";
+                pref = "h_";
+            }
+
+
+            /* new_row+="<td>"+hotel+"("+city+","+country+")</td>";
+             new_row+="<td>"+start_date+"</td>";
+             new_row+="<td>"+nights+"</td>";
+             new_row+="<td>"+end_date+"</td>";
+             new_row+="<td>"+rooms+"</td>";*/
+            new_row += "<td><span class=client_service_payed>" + client_service_payed + "</span>/" + client_service_cost + "</td>";
+            new_row += "<td><span class=agent_service_payed>" + agent_service_payed + "</span>/" + agent_service_cost + "</td>";
+            new_row += "<input type=hidden id=r_operator_id name=" + pref + "operator_id[] value=" + operator_id + ">";
+            new_row += "<input type=hidden id=r_country_id name=" + pref + "country_id[] value=" + country_id + ">";
+            new_row += "<input type=hidden id=r_city_id name=" + pref + "city_id[] value=" + city_id + ">";
+            new_row += "<input type=hidden id=r_hotel_id name=" + pref + "hotel_id[] value=" + hotel_id + ">";
+            new_row += "<input type=hidden id=r_start_date name=" + pref + "start_date[] value=" + start_date + ">";
+            new_row += "<input type=hidden id=r_nights name=" + pref + "nights[] value=" + nights + ">";
+            new_row += "<input type=hidden id=r_end_date name=" + pref + "end_date[] value=" + end_date + ">";
+            new_row += "<input type=hidden id=r_rooms name=" + pref + "rooms[] value=" + rooms + ">";
+            new_row += "<input type=hidden id=r_room_type name=" + pref + "room_type[] value=" + room_type + ">";
+            new_row += "<input type=hidden id=r_place_type name=" + pref + "place_type[] value=" + food_type + ">";
+            new_row += "<input type=hidden id=r_food_type name=" + pref + "food_type[] value=" + place_type + ">";
+            new_row += "<input type=hidden class=r_client_service_cost name=" + pref + "client_service_cost[] value=" + client_service_cost + ">";
+            new_row += "<input type=hidden class=r_agent_service_cost name=" + pref + "agent_service_cost[] value=" + agent_service_cost + ">";
+            new_row += "<input type=hidden class=r_client_service_payed name=" + pref + "client_service_payed[] value=" + client_service_payed + ">";
+            new_row += "<input type=hidden class=r_agent_service_payed name=" + pref + "agent_service_payed[] value=" + agent_service_payed + ">";
+            new_row += "<input class=deal_service service_type=" + pref + " value=" + agent_service_payed + ">";
+            if (tour_id > 0) new_row += "<input type=hidden  id=r_tour_id name=" + pref + "tour_id[] value=" + tour_id + ">";
+
+
+            new_row += "</tr>";
+
+            if (service_type == 1) {
+                //$("#tourList tbody").append(new_row);
+                //$("#tourList").show();
+                service_type_name = "Тур";
+
+            } else if (service_type == 2) {
+                //$("#hotelList tbody").append(new_row);
+                //$("#hotelList").show();
+                service_type_name = "Отель";
+
+            }
+            $("#servicesList tbody").append(new_row);
+            $("#servicesList").show();
+
+            $("#multiAdd").html("");
+            $("#tour_id").val("");
+
+
+            set_deals_sums();
+            services[tour_id] = service_type_name + " " + hotel + "(" + city + "," + country + ")";
+            service_num++;
+
+        })
+
+        $(".services_body").on("click", "#ticketAddButton", function () {
+
+            ticket_id = $("#ticket_id").val();
+
+            departure_country_id = $("#dep_countries").val();
+            departure_country_id = $("#dep_countries").val();
+            departure_country = $("#dep_countries option:selected").html();
+            arrival_country_id = $("#arr_countries").val();
+            arrival_country = $("#arr_countries option:selected").html();
+
+            departure_city_id = $("#dep_cities").val();
+            departure_city = $("#dep_cities option:selected").html();
+            arrival_city_id = $("#arr_cities").val();
+            arrival_city = $("#arr_cities option:selected").html();
+
+            departure_airport_id = $("#dep_airports").val();
+            departure_airport = $("#dep_airports option:selected").html();
+            arrival_airport_id = $("#arr_airports").val();
+            arrival_airport = $("#arr_airports option:selected").html();
+
+            start_date = $("#departure_date").val();
+            end_date = start_date;
+            operator_id = $("#operator").val();
+            operator = $("#operator option:selected").html();
+            ticket_num = $("#ticket_num").val();
+            client_service_cost = $("#client_service_cost").val();
+            agent_service_cost = $("#agent_service_cost").val();
+            var client_service_payed = 0, agent_service_payed = 0;
+            if (ticket_id > 0) {
+                $("#servicesList tbody #multi_ticket_row_" + ticket_id).remove();
+                $.ajax({
+                    type: 'POST',
+                    url: '{MAIN_URL}deals/deals',
+                    data: {
+                        detect: "SERVICE_UPDATE",
+                        type: 3,
+                        ticket_id: ticket_id,
+                        departure_date: start_date,
+                        dep_country_id: departure_country_id,
+                        arrival_country_id: arrival_country_id,
+                        dep_city_id: departure_city_id,
+                        arrival_city_id: arrival_city_id,
+                        dep_airport_id: departure_airport_id,
+                        arrival_airport_id: arrival_airport_id,
+                        ticket_num: ticket_num,
+                        end_date: end_date,
+
+                        operator_id: operator_id,
+
+                    },
+                    success: function () {
+
+                    }
+                })
+
+            } else {
+                ticket_id = service_num;
+            }
+
+
+            new_row = "<tr class=\"multi_ticket_row\" id=\"multi_ticket_row_" + ticket_id + "\" service_id=" + ticket_id + ">";
+            new_row += "<td>" + service_num + "</td>";
+            new_row += "<td>Билет из " + departure_city + "(" + departure_airport + ") в " + arrival_city + "(" + arrival_airport + ") " + start_date + "</td>";
+            /*new_row+="<td>"+departure_city+"("+departure_airport+")</td>";
+             new_row+="<td>"+arrival_city+"("+arrival_airport+")</td>";
+             new_row+="<td>"+ticket_num+"</td>";*/
+            new_row += "<td><span class=client_service_payed>" + client_service_payed + "</span>/" + client_service_cost + "</td>";
+            new_row += "<td><span class=agent_service_payed>" + agent_service_payed + "</span>/" + agent_service_cost + "</td>";
+            new_row += "<input type=hidden name=tc_operator_id[] value=" + operator_id + ">";
+            new_row += "<input type=hidden name=tc_dep_country_id[] value=" + departure_country_id + ">";
+            new_row += "<input type=hidden name=tc_arr_country_id[] value=" + arrival_country_id + ">";
+            new_row += "<input type=hidden name=tc_dep_city_id[] value=" + departure_city_id + ">";
+            new_row += "<input type=hidden name=tc_arr_city_id[] value=" + arrival_city_id + ">";
+            new_row += "<input type=hidden name=tc_dep_airport_id[] value=" + departure_airport_id + ">";
+            new_row += "<input type=hidden name=tc_arr_airport_id[] value=" + arrival_airport_id + ">";
+            new_row += "<input type=hidden name=tc_start_date[] value=" + start_date + ">";
+            new_row += "<input type=hidden name=tc_end_date[] value=" + end_date + ">";
+            new_row += "<input type=hidden name=tc_ticket_num[] value=" + ticket_num + ">";
+            new_row += "<input type=hidden class=r_client_service_cost name=tc_client_service_cost[] value=" + client_service_cost + ">";
+            new_row += "<input type=hidden class=r_agent_service_cost name=tc_agent_service_cost[] value=" + agent_service_cost + ">";
+            new_row += "<input type=hidden class=r_client_service_payed name=tc_client_service_payed[] value=" + client_service_payed + ">";
+            new_row += "<input type=hidden class=r_agent_service_payed name=tc_agent_service_payed[] value=" + agent_service_payed + ">";
+            if (ticket_id > 0) new_row += "<input type=hidden  id=r_ticket_id name=tc_ticket_id[] value=" + ticket_id + ">";
+            new_row += "</tr>";
+
+            //$("#ticketList tbody").append(new_row);
+            $("#servicesList tbody").append(new_row);
+            $("#servicesList").show();
+            //$("#ticketList").show();
+
+            $("#multiAdd").html("");
+
+
+            set_deals_sums();
+            services[ticket_id] = "Билет из " + departure_city + "(" + departure_airport + ") в " + arrival_city + "(" + arrival_airport + ")";
+            service_num++;
+        })
+
+
+        $(".services_body").on("click", "#visaAddButton", function () {
+
+            visa_id = $("#visa_id").val();
+
+            country_id = $("#countries").val();
+            country = $("#countries option:selected").html();
+            visa_type_id = $("#visa_types").val();
+            visa_type = $("#visa_types option:selected").html();
+            multiplicity = $("#multiplicity").val();
+            start_date = $("#visa_start_date").val();
+            end_date = $("#visa_end_date").val();
+            client_submit_date = $("#client_submit_date").val();
+            consulate_submit_date = $("#consulate_submit_date").val();
+            client_service_cost = $("#client_service_cost").val();
+            agent_service_cost = $("#agent_service_cost").val();
+            var client_service_payed = 0, agent_service_payed = 0;
+            if (visa_id > 0) {
+                $("#servicesList tbody #multi_visa_row_" + visa_id).remove();
+                $.ajax({
+                    type: 'POST',
+                    url: '{MAIN_URL}deals/deals',
+                    data: {
+                        detect: "SERVICE_UPDATE",
+                        type: 3,
+                        visa_id: visa_id,
+                        departure_date: start_date,
+                        dep_country_id: departure_country_id,
+                        arrival_country_id: arrival_country_id,
+                        dep_city_id: departure_city_id,
+                        arrival_city_id: arrival_city_id,
+                        dep_airport_id: departure_airport_id,
+                        arrival_airport_id: arrival_airport_id,
+                        ticket_num: ticket_num,
+                        end_date: end_date,
+
+                        operator_id: operator_id,
+
+                    },
+                    success: function () {
+
+                    }
+                })
+
+            } else {
+                visa_id = service_num;
+            }
+
+
+            new_row = "<tr class=\"multi_visa_row_\" id=\"multi_visa_row_" + visa_id + "\" service_id=" + visa_id + ">";
+            new_row += "<td>" + service_num + "</td>";
+            new_row += "<td>" + visa_type + " виза в " + country + " c " + start_date + " по " + end_date + "</td>";
+            /*new_row+="<td>"+departure_city+"("+departure_airport+")</td>";
+             new_row+="<td>"+arrival_city+"("+arrival_airport+")</td>";
+             new_row+="<td>"+ticket_num+"</td>";*/
+            new_row += "<td><span class=client_service_payed>" + client_service_payed + "</span>/" + client_service_cost + "</td>";
+            new_row += "<td><span class=agent_service_payed>" + agent_service_payed + "</span>/" + agent_service_cost + "</td>";
+            new_row += "<input type=hidden name=v_country_id[] value=" + country_id + ">";
+            new_row += "<input type=hidden name=v_visa_type_id[] value=" + visa_type_id + ">";
+            new_row += "<input type=hidden name=v_start_date[] value=" + start_date + ">";
+            new_row += "<input type=hidden name=v_end_date[] value=" + end_date + ">";
+            new_row += "<input type=hidden name=v_client_submit_date[] value=" + client_submit_date + ">";
+            new_row += "<input type=hidden name=v_consulate_submit_date[] value=" + consulate_submit_date + ">";
+            new_row += "<input type=hidden name=v_multiplicity[] value=" + multiplicity + ">";
+            new_row += "<input type=hidden class=r_client_service_cost name=v_client_service_cost[] value=" + client_service_cost + ">";
+            new_row += "<input type=hidden class=r_agent_service_cost name=v_agent_service_cost[] value=" + agent_service_cost + ">";
+            new_row += "<input type=hidden class=r_client_service_payed name=v_client_service_payed[] value=" + client_service_payed + ">";
+            new_row += "<input type=hidden class=r_agent_service_payed name=v_agent_service_payed[] value=" + agent_service_payed + ">";
+            if (visa_id > 0) new_row += "<input type=hidden  id=r_visa_id name=v_visa_id[] value=" + visa_id + ">";
+            new_row += "</tr>";
+
+            //$("#ticketList tbody").append(new_row);
+            $("#servicesList tbody").append(new_row);
+            $("#servicesList").show();
+            //$("#ticketList").show();
+
+            $("#multiAdd").html("");
+
+            set_deals_sums();
+            services[visa_id] = visa_type + " виза в " + country + " c " + start_date + " по " + end_date;
+            service_num++;
+        })
+
+
+        /*$(".services_body").on("click",".serviceAddButton", function(){
+         type_id = $(this).attr("type_id");
+         table = $(this).parent().parent().parent();
+         if (services[service_num] === undefined) services[service_num] = {};
+         services[service_num]["country_id"] = table.find($("#countries").val());
+         if(type_id == 4){
+
+         }
+
+         console.log(services);
+
+         });*/
+        /*
+         function create_new_service_row(type_id){
+         switch(type_id){
+         case 1: //Тур
+         console.log(1);
+         break;
+         case 2: //Отель
+         console.log(2);
+         break;
+         case 3: //Билет
+         console.log(3);
+         break;
+         case 4: //Виза
+         console.log(4);
+         break;
+         }
+         new_row="<tr class=\"multi_ticket_row\" id=multi_ticket_row_ service_id=>";
+         new_row+="<td>1</td>"
+         new_row+="</tr>"
+         $("#servicesList tbody").append(new_row);
+         $("#servicesList").show();
+         console.log(new_row);
+
+
+         }*/
+
+    </script>
+
+    <!-- END multi_block -->
+
+
+    <fieldset class="deal_element">
+        <legend>Оплата</legend>
+
+        <table class="pays">
+            <tbody>
+            <!--<tr >
+		    <td colspan="4">Включить учет USD <input type="checkbox" disabled name="use_usd" id="use_usd" onChange="showUsd()" {USE_USD}> Курс на сегодня: 1руб. = <input tabindex="1" type="text" id="course" name="course" onChange="set_sum()" onKeyUp="set_sum()" value="{COURSE}"></td>
+		</tr>-->
+            <tr>
+                <td></td>
+                <td>стоимость тура</td>
+                <td>Оплачено</td>
+                <td colspan="2">Остаток</td>
+
+            </tr>
+            <tr>
+                <td>Для туриста</td>
+                <td><input tabindex="2" class="money" type="text" name="sum_rub" id="sum_rub" onChange="set_sum(1)"
+                           onKeyUp="set_sum(1)" value="{SUM_RUB}"> руб. <span class="usd">/ <span id="full_sum_ue"> {SUM_UE}</span> USD</span>
+                </td>
+                <td><input class="money" type="text" id="payed_sum" value="{PAYED_SUM_RUB}" readonly> руб.<span
+                        class="usd">/ <span id="payed_sum_ue"> {PAYED_SUM}</span> USD</span></td>
+                <td><input class="money" type="text" id="rest_sum" value="{REST_SUM_RUB}" readonly> руб.<span
+                        class="usd">/ <span id="rest_sum_ue"> {REST_SUM}</span> USD </span></td>
+                <td>
+                    <submit id="pay_add" onClick="payAdd(1)" class="buttons">Добавить платеж</submit>
+                </td>
+            </tr>
+            <tr>
+                <td>Для агенства</td>
+                <td><input tabindex="3" class="money" type="text" name="agent_sum_rub" id="agent_sum_rub"
+                           onChange="set_sum(2)" onKeyUp="set_sum(2)" value="{AGENT_SUM_RUB}">руб.<span
+                        class="usd">/ <span id="agent_full_sum_ue"> {AGENT_SUM_UE}</span> USD</span></td>
+                <td><input class="money" type="text" id="agent_payed_sum" value="{AGENT_PAYED_SUM_RUB}" readonly>
+                    руб.<span class="usd">/ <span id="agent_payed_sum_ue"> {AGENT_PAYED_SUM}</span> USD</span></td>
+                <td><input class="money" type="text" id="agent_rest_sum" value="{AGENT_REST_SUM_RUB}" readonly>руб.<span
+                        class="usd">/ <span id="agent_rest_sum_ue"> {AGENT_REST_SUM}</span> USD </span></td>
+                <td>
+                    <submit id="pay_add" onClick="payAdd(2)" class="buttons">Добавить платеж</submit>
+                </td>
+            </tr>
+            <tr>
+                <td>Прибыль</td>
+                <td colspan="4"><input class="money" type="text" id="profit" readonly></td>
+
+            </tr>
+            </tbody>
+        </table>
+
+        <table id="pays_table" class="tur_table">
+            <thead>
+            <th>Дата платежа</th>
+            <th>Тип платежа</th>
+            <th class="usd">Сумма у.е.</th>
+            <th>Сумма руб.</th>
+            <th>Статус</th>
+            </thead>
+            <tbody>
+            <!-- BEGIN pay_list -->
+            <tr class="pay_type_{PAY_TYPE_ID} pays">
+                <td>{PAY_DATE}</td>
+                <td>{PAY_TYPE}</td>
+                <td class="usd">{PAY_SUM_UE}</td>
+                <td class="pay_sum">{PAY_SUM_RUB}</td>
+                <td>{PAY_STATUS}<img src="{IMG_URL}del.gif" class="pay_delete"></td>
+                <input type="hidden" id="pays_sum" value={PAY_SUM_RUB}>
+                <input type="hidden" id="pays_id" value={PAY_ID}>
+                <input type="hidden" id="pays_deal_type" value={PAY_DEAL_TYPE_ID}>
+                <input type="hidden" id="pays_type" value={PAY_TYPE_ID}>
+            </tr>
+            <!-- END pay_list -->
+            </tbody>
+
+        </table>
+    </fieldset>
+
+    <div id="formBody"></div>
+    <div id="deal_bottom">
+        <fieldset class="deal_element">
+            <legend>Документы</legend>
+
+            <!-- Выберите тип документа:
+            <select>
+                <option>
+                    Договор
+                </option>
+            </select><br>
+            Выберите услугу
+            <select>
+                <option>
+                    Отель Као Лак(Паттайя, Тайланд)
+                </option>
+
+            </select><br>
+            <a href=#>Печать документа</a> -->
+
+            <ul>
+                {DOCUMENTS}
+            </ul>
+        </fieldset>
+        <!-- BEGIN reactions -->
+        <select id="reaction" name="reaction_id" placeHolder="Выберите реакцию" style="width:500px">
+            <option value="0">Без изменения статуса</option>
+            {REACTIONS}
+        </select> <br>
+
+        <div id="money_back" style="display: none">
+            <input type="checkbox" name="need_money_back" id="need_money_back" value="1"> Возврат оплаты<br>
+            Сумма: <input type="text" id="money_back_sum" name="money_back_sum" class="money" style="text-align: right">руб.
+            <select name="back_pay_type_id" placeholder="выберите тип оплаты"
+                    style="width:205px;">{DEAL_PAY_TYPES}</select>
+
+
+        </div>
+        Комментарий: <br><textarea rows="10" cols="50" width="300px" id="commentary" name="commentary"></textarea><br>
+
+        <!-- END reactions -->
+        <!-- <input type="checkbox" name="book"> Заявка забронирована<br>
+	<input type="checkbox" name="documents"> Документы  выданы<br>
+    <input type="checkbox" name="pays"> Заверщены платежи клиента <br>
+	<input type="checkbox" name="agent_pays"> Заверщены платежи контрагенту <br>
+	<input type="checkbox" name="after_call"> Совершен звонок клиенту <br>-->
+
+        <!-- BEGIN button_add -->
+        <input type="hidden" name="detect" value="ADD_OK">
+        <input type="hidden" name="deal_id" value="{DEAL_ID}">
+        <input type="hidden" name="type_id" value="{TYPE_ID}">
+        <input type="hidden" name="request_id" value="{REQUEST_ID}">
+        <!-- END button_add -->
+        <!-- BEGIN button_edit -->
+        <input type="hidden" name="deal_id" value="{DEAL_ID}">
+        <input type="hidden" name="detect" value="EDIT_OK">
+        <input type="hidden" name="type_id" value="{TYPE_ID}">
+        <!-- END button_edit -->
+        <a href="{MAIN_URL}deals/deals/">
+            <submit>Назад</submit>
+        </a>
+        <button class="buttons">Сохранить</button>
+
+    </div>
+
+    <div style="text-align:center;">
+        <div style="width:600px; border: 1px solid #99bbe8; border-bottom:0;color:#15428b; margin:0 auto"
+             class="x-panel-header">
+            <b>История обращений</b>
+        </div>
+        <div style="width:600px; height: 500px; overflow-y: scroll; border: 1px solid #99bbe8; margin:0 auto">
+            <table width="100%" cellspacing="0" class="hist">
+                <thead>
+                <th width="80">Дата</th>
+                <th width="80">Реакция</th>
+                <th width="120">Менеджер</th>
+                <th>Комментарий</th>
+                </thead>
+                <!-- BEGIN deal_hist -->
+                <tr>
+                    <td style="background-color:{HIST_COLOR};" align="center" class="sz0">
+                        {CREATE_DATE}
+                    </td>
+                    <td>{REACTION}</td>
+                    <td align="center" class="sz0">
+                        {MANAGER_FIO}
+                    </td>
+
+                    <td>{COMMENTARY}</td>
+                </tr>
+                <!-- END deal_hist -->
+            </table>
+
+        </div>
+
+    </div>
+</form>
+
+<div style="display: none;">
+    <div class="box-modal" id="pay_add_div">
+        <!--   <div class="box-modal_close arcticmodal-close">закрыть</div>
+         <label for "pay_type">Вид платежа:</label>
+           <select id="pay_type" name="pay_type_id">
+               <option value="1">Платеж туриста</option>
+               <option value="2">Платеж контрагенту</option>
+           </select><br>
+           <label for="pay_services">Услуга: </label>
+           <select id="pay_services" name="pay_service_id">
+           </select></br>
+           <label for="deal_pay_types">Способ оплаты: </label>
+           <select id="deal_pay_type" name="deal_pay_type_id">
+               {DEAL_PAY_TYPES}
+           </select><br>
+           <label for="pay_date">Дата платежа:</label>
+           <input type="date" type="pay_date" id="pay_date" readonly value="{TODAY}"><br>
+           <label for="unpayed">Неоплачено: </label>
+           <input type="text" name="unpayed_rub" id="unpayed_rub" readonly onChange="set_pay_sum(1)"> руб
+           <span id="unpayed_ue_s">/usd<br></span><br>
+           <label for="pay_sum">Сумма платежа: </label>
+           <input type="text" name="pay_sum" id="pay_sum" onKeyup="set_pay_sum()"> руб
+           <span id="pay_sum_ue_s">/usd<br></span><br>
+           <submit id="pay_add_close">Добавить</submit>
+           <submit id="pay_edit_close" style="display:none">Добавить</submit> -->
+    </div>
+</div>
+
+<div style="display: none;">
+    <div class="box-modal" id="client_select">
+        <div class="box-header">
+            ВЫБОР КЛИЕНТА
+        </div>
+        <div class="box-modal_close arcticmodal-close">X</div>
+        <div class="box-content">
+            <div id="center_header" class="tabs">
+                <input id="tab1" type="radio" name="tabs" checked show="client_frm" hide="legal_frm">
+                <label for="tab1" title="Вкладка 1">ФИЗИЧЕСКОЕ ЛИЦО</label>
+
+                <input id="tab2" type="radio" name="tabs" show="legal_frm" hide="client_frm">
+                <label for="tab2" title="Вкладка 2">ЮРИДИЧЕСКОЕ ЛИЦО</label>
+                <span class="box-search">Введите фио для поиска: </span>
+                <input type="text" id="client_filter">
+                <a href="#" onClick="client_add({DEAL_ID})"><img src="{IMG_URL}client_add.png"></a>
+            </div>
+            <div class="main_form">
+                <div class="main_table">
+                    <table id="client_search">
+                        <thead>
+                        <th>ФИО</th>
+                        <th>Дата рождения</th>
+                        <th>Телефон</th>
+                        <th>Паспорт</th>
+
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box-footer">
+                    <img src="{IMG_URL}choise.png" onclick='client_add({DEAL_ID},$(".client_select").attr("id").substr(19) )'>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+    $("#client_search").on("click","tr",function(){
+        $("#client_search tr").removeClass("client_select");
+        $(this).addClass("client_select");
+    })
+
+
+</script>
+<div style="display: none;">
+    <div class="box-modal" id="client_add_div">
+        <div class="box-modal_close arcticmodal-close">закрыть</div>
+        <form method="POST" id="client_add_form" action="javascript:void(null);" onsubmit="client_frm_check(this);
+		call()">
+
+            <table class="main">
+                <tbody>
+
+                <tr>
+                    <td class="items">
+                        <table class="fio">
+                            <tr class="items">
+                                <td class="fio">
+                                    Фамилия*:<br>
+                                    <input type="text" name="lname" id="lname" value="{CLIENT_LNAME}" maxlength="256"
+                                           style="width:200px;" onChange="checkClient({CLIENT_ID})"
+                                           onKeyUp="transl(this.value, 1)">
+                                </td>
+                                <td class="fio">Имя*:<br><input type="text" name="fname" id="fname"
+                                                                value="{CLIENT_FNAME}" maxlength="32"
+                                                                style="width:200px" onChange="checkClient({CLIENT_ID})"
+                                                                onKeyUp="transl(this.value, 2)"></td>
+                                <td class="fio">Отчество<br><input type="text" name="mname" id="mname"
+                                                                   value="{CLIENT_MNAME}" maxlength="32"
+                                                                   style="width:200px"
+                                                                   onChange="checkClient({CLIENT_ID})"></td>
+                                <td class="fio">Дата рожджения*:<input type="date" id="birthdate" name="birthdate"
+                                                                       value="{BIRTHDATE}" max="{TODAY}"
+                                                                       onChange="birthDateToAge(this.value);"></td>
+                                <td>Место рождения<input type="text" name="birthplace" value="{BIRTHPLACE}"></td>
+                            </tr>
+
+                            <tr>
+                                <td class="fio">
+                                    Surname<br>
+                                    <input type="text" name="eng_lname" id="eng_lname" value="{E_CLIENT_LNAME}"
+                                           maxlength="256" style="width:200px;" readonly>
+                                </td>
+                                <td class="fio">Name<br><input type="text" name="eng_fname" id="eng_fname"
+                                                               value="{E_CLIENT_FNAME}" maxlength="32" style="200px"
+                                                               readonly></td>
+                                <td class="fio">Пол:<br>Муж.<input type="radio" {M_CHECK} name="sex" value="1">
+                                    Жен.<input type="radio" {F_CHECK} name="sex" value="2"></td>
+                                <td class="fio" id="age">Возраст: {AGE}</td>
+                                <!-- <td>Место рождения(translit)<input type="text" name="eng_birthdate" value="{E_BIRTHPLACE}" maxlength="128" style="width:100%;"></td></tr> !-->
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="items" colspan="2">
+                        <table class="fio">
+                            <caption>Контактная информация</caption>
+                            <tr>
+                                <td>
+                                    Домашний адрес<br>
+                                    <input type="text" name="address" value="{ADDRESS}" maxlength="256"
+                                           style="width:100%;">
+                                </td>
+                                <td class="contact">Мобильный телефон:<input type="text" name="mob_phone" id="mob_phone"
+                                                                             value="{MOB_PHONE}" maxlength="10"
+                                                                             style="width:100%"></td>
+                                <td class="contact">Домашний телефон:<input type="text" name="home_phone"
+                                                                            value="{HOME_PHONE}" style="width:100%;">
+                                </td>
+                                <td class="contact">E-mail:<input type="email" name="email" value="{EMAIL}"
+                                                                  maxlength="32" style="width:100%"></td>
+                            </tr>
+
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="items" colspan="2">
+                        <table class="fio">
+                            <caption>Заграничный паспорт</caption>
+                            <tr>
+                                <td width="50px">
+                                    Серия:<br>
+                                    <input type="text" name="f_pass_ser" value="{F_PASS_SER}" maxlength="256"
+                                           style="width:100%;">
+                                </td>
+                                <td width="80px">Номер:<input type="text" name="f_pass_num" value="{F_PASS_NUM}"
+                                                              maxlength="32" style="width:100%"></td>
+                                <td width="50%">Кем выдан:<input type="text" name="f_pass_issue_place"
+                                                                 value="{F_PASS_ISSUE_PLACE}" maxlength="32"
+                                                                 style="width:100%"></td>
+                                <!-- <td class="contact">Когда выдан:<input type="date" name="f_pass_issue_date" value="{F_PASS_ISSUE_DATE}" style="width:100%;"></td> -->
+                                <td>Действителен до:<input type="date" name="f_pass_end_date" value="{F_PASS_END_DATE}"
+                                                           style="width:100%;"
+                                                           placeholder="Поиск в закладках и журнале"></td>
+
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="items" colspan="2">
+                        <table class="fio">
+                            <caption>Национальный паспорт</caption>
+                            <tr>
+                                <td width="50px">
+                                    Серия:<br>
+                                    <input type="text" name="r_pass_ser" value="{R_PASS_SER}" maxlength="256"
+                                           style="width:100%;">
+                                </td>
+                                <td width="80px">Номер:<input type="text" name="r_pass_num" value="{R_PASS_NUM}"
+                                                              maxlength="32" style="width:100%"></td>
+                                <td width="50%">Кем выдан:<input type="text" name="r_pass_issue_place"
+                                                                 value="{R_PASS_ISSUE_PLACE}" maxlength="32"
+                                                                 style="width:100%"></td>
+                                <td>Когда выдан:<input type="date" name="r_pass_issue_date" value="{R_PASS_ISSUE_DATE}"
+                                                       style="width:100%;"></td>
+
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+
+                </tbody>
+            </table>
+            <input type="hidden" name="detect" value="ADD_OK">
+            <input type="hidden" name="deal_id" value="{DEAL_ID}">
+            <button>Сохранить</button>
+        </form>
+    </div>
+</div>
+
+
+<table width=100% id="tourAddBlock" style="display: none">
+    <tr>
+        <td>
+            Город вылета:<br>
+            <select id="departure_city" name="departure_city_id" class="demo-default"
+                    placeholder="Выберите город вылета...">{DEP_CITIES}</select>
+        </td>
+        <td>
+            Дата начала :<br>
+            <input type="date" name="start_date" id="start_date" value="{START_DATE}">
+        </td>
+        <td>
+            Количество ночей <br>
+            <input type="number" name="nights" id="nights" min="1" value="{NIGHTS}">
+        </td>
+        <td>
+            Дата окончания <br>
+            <input type="date" name="end_date" id="end_date" readonly value="{END_DATE}">
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Оператор:
+            <select id="operator" name="operator_id" class="demo-default" placeholder="Выберите оператора...">{OPERATORS}</select>
+        </td>
+        <td>
+            Страна:
+            <select id="countries" name="country_id" class="demo-default"
+                    placeholder="Выберите страну...">{COUNTRIES}</select>
+        </td>
+        <td>
+            Город:
+            <select id="cities" name="city_id" class="demo-default" placeholder="Выберите город...">{CITIES}</select>
+        </td>
+        <td>
+            Отель:
+            <select id="hotels" name="hotel_id" class="demo-default" placeholder="Выберите отель...">{HOTELS}</select>
+        </td>
+
+    </tr>
+    <tr>
+        <td>
+            Количество номеров:<br>
+            <input type="number" name="rooms" id="rooms" min="1" placeHolder="Введите кол-во..." value='{ROOMS}'>
+        </td>
+        <td>
+            Тип комнаты:
+            <select id="room_type" name="room_type">{ROOMTYPES}</select>
+        </td>
+        <td>
+            Тип питания:
+            <select id="food_type" name="food_type">{FOODTYPES}</select>
+        </td>
+        <td>
+            Тип размещения:
+            <select id="place_type" name="place_type">{PLACETYPES}</select>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Стоимость для клиента: <br>
+            <input type="text" class="money" id="client_service_cost">
+        </td>
+        <td>
+            Стоимость для агенства: <br>
+            <input type="text" class="money" id="agent_service_cost">
+        </td>
+    </tr>
+    <tr>
+        <td colspan="4">
+            <submit id="hotelAddButton" service_type="1">Добавить тур</submit>
+            <input type="hidden" id="tour_id">
+        </td>
+    </tr>
+</table>
+
+
+<table width=100% id="hotelAddBlock" style="display: none">
+    <tr>
+        <td>
+
+        </td>
+        <td>
+            Дата начала :<br>
+            <input type="date" name="start_date" id="start_date" value="{START_DATE}">
+        </td>
+        <td>
+            Количество ночей <br>
+            <input type="number" name="nights" id="nights" min="1" value="{NIGHTS}">
+        </td>
+        <td>
+            Дата окончания <br>
+            <input type="date" name="end_date" id="end_date" readonly value="{END_DATE}">
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Оператор:
+            <select id="operator" name="operator_id" class="demo-default" placeholder="Выберите оператора...">{OPERATORS}</select>
+        </td>
+        <td>
+            Страна:
+            <select id="countries" name="country_id" class="demo-default"
+                    placeholder="Выберите страну...">{COUNTRIES}</select>
+        </td>
+        <td>
+            Город:
+            <select id="cities" name="city_id" class="demo-default" placeholder="Выберите город...">{CITIES}</select>
+        </td>
+        <td>
+            Отель:
+            <select id="hotels" name="hotel_id" class="demo-default" placeholder="Выберите отель...">{HOTELS}</select>
+        </td>
+
+    </tr>
+    <tr>
+        <td>
+            Количество номеров:<br>
+            <input type="number" name="rooms" id="rooms" min="1" placeHolder="Введите кол-во..." value='{ROOMS}'>
+        </td>
+        <td>
+            Тип комнаты:
+            <select id="room_type" name="room_type">{ROOMTYPES}</select>
+        </td>
+        <td>
+            Тип питания:
+            <select id="food_type" name="food_type">{FOODTYPES}</select>
+        </td>
+        <td>
+            Тип размещения:
+            <select id="place_type" name="place_type">{PLACETYPES}</select>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Стоимость для клиента: <br>
+            <input type="text" class="money" id="client_service_cost">
+        </td>
+        <td>
+            Стоимость для агенства: <br>
+            <input type="text" class="money" id="agent_service_cost">
+        </td>
+    </tr>
+    <input type="hidden" id="tour_id">
+    <tr>
+        <td colspan="4">
+            <submit id="hotelAddButton" service_type="2">Добавить отель</submit>
+        </td>
+    </tr>
+</table>
+
+<table id="ticketAddBlock" style="display:none">
+    <tr>
+        <td>
+            Оператор:
+            <select id="operator" name="operator_id" class="demo-default" placeholder="Выберите оператора...">
+                <option value=""></option>
+                {OPERATORS}</select>
+        </td>
+        <td>
+            <label for="departure_date">Дата вылета: </label><br>
+            <input type="date" id="departure_date" name="departure_date" value="{DEP_DATE}">
+        </td>
+        <td>
+            <label for="ticket_num">Количество билетов:</label><br>
+            <input type="number" id="ticket_num" name="ticket_num" value="{TICKET_NUM}">
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            Страна вылета:
+            <select id="dep_countries" name="dep_country_id" class="demo-default" placeholder="Выберите страну...">
+                <option value=""></option>
+                {DEP_COUNTRIES}</select>
+            </div>
+        </td>
+        <td>
+            Город вылета:
+            <select id="dep_cities" name="dep_city_id" class="demo-default"
+                    placeholder="Выберите город...">{DEP_CITIES}</select>
+        </td>
+        <td>
+            Аэропорт вылета:
+            <select id="dep_airports" name="dep_airport_id" class="demo-default" placeholder="Выберите аэропорт...">{DEP_AIRPORTS}</select>
+        </td>
+
+    </tr>
+    <tr>
+        <td>
+            Страна прилета:
+            <select id="arr_countries" name="arr_country_id" class="demo-default" placeholder="Выберите страну...">
+                <option value=""></option>
+                {ARR_COUNTRIES}</select>
+        </td>
+        <td>
+            Город прилета:
+            <select id="arr_cities" name="arr_city_id" class="demo-default"
+                    placeholder="Выберите город...">{ARR_CITIES}</select>
+        </td>
+        <td>
+            Аэропорт прилета:
+            <select id="arr_airports" name="arr_airport_id" class="demo-default" placeholder="Выберите аэропорт...">{ARR_AIRPORTS}</select>
+
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Стоимость для клиента: <br>
+            <input type="text" class="money" id="client_service_cost">
+        </td>
+        <td>
+            Стоимость для агенства: <br>
+            <input type="text" class="money" id="agent_service_cost">
+        </td>
+    </tr>
+    <tr>
+        <td colspan="4">
+            <input type="hidden" name="ticket_id" id="ticket_id">
+            <submit id="ticketAddButton">Добавить билет</submit>
+        </td>
+    </tr>
+
+</table>
+
+<table id="visaAddBlock" style="display:none">
+
+    <tr>
+        <td>
+            Страна:
+            <select id="countries" name="visa_country_id" class="demo-default" placeholder="Выберите страну...">{COUNTRIES}</select>
+        </td>
+        <td>
+            Тип визы:
+            <select id="visa_types" name="visa_type_id" class="demo-default" placeholder="Выберите тип визы...">{VISA_TYPES}
+                <option value=1>Шенген</option>
+            </select>
+        </td>
+        <td>
+            Кратность:
+            <input type="number" id="multiplicity">
+        </td>
+        <td>
+        </td>
+
+    </tr>
+    <tr>
+        <td>
+            Дата начала:
+            <input type="date" name="visa_start_date" id="visa_start_date">
+        </td>
+        <td>
+            Дата окончания:
+            <input type="date" name="visa_end_date" id="visa_end_date">
+        </td>
+        <td>
+            Срок сдачи документов туриста:
+            <input type="date" name="client_submit_date" id="client_submit_date">
+
+        </td>
+        <td>
+            Срок сдачи документов в консультсво:
+            <input type="date" name="consulate_submit_date" id="consulate_submit_date">
+
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Стоимость для клиента: <br>
+            <input type="text" class="money" id="client_service_cost">
+        </td>
+        <td>
+            Стоимость для агенства: <br>
+            <input type="text" class="money" id="agent_service_cost">
+        </td>
+    </tr>
+    <tr>
+        <td colspan="4">
+            <input type="hidden" name="visa_id" id="visa_id">
+            <submit id="visaAddButton" class="serviceAddButton" type_id="4">Добавить визу</submit>
+        </td>
+    </tr>
+
+</table>
+
+
+<script type="text/javascript">
+    $("#need_money_back").change(function () {
+        if ($("#need_money_back").prop("checked")) $("#money_back_sum").prop("disabled", false);
+        else $("#money_back_sum").prop("disabled", true);
+    })
+    $("#need_money_back").trigger("change")
+    $("#reaction").change(function () {
+        if ($("#reaction option:selected").attr("status_out") == 5) {
+            $("#money_back").show("slow");
+            $("#money_back_sum").val($("#payed_sum").val());
+        }
+        else {
+            $("#money_back").hide("slow");
+
+        }
+    })
+
+    readonly = {READONLY};
+
+    /*if(child_ages.length>0&&child_ages[0]>0){
+     $("#child_ages").html(" Возраст:");
+     for(i = 0; i<child_ages.length; i++){
+     $("#child_ages").append("<input type='number' name=child_age[] min=0 max=18 class=child_age value="+child_ages[i]+">");
+     }
+     }*/
+
+    /*  $("#rooms").on("change keyup", function(){
+     $("#rooms_elements").html("");
+     for(var i = 0; i<$(this).val(); i++){
+     html='<tr><td>Тип комнаты:<select id="room_type" name="room_type[]">{ROOMTYPES}</select></td>'+
+     '<td>Тип питания:<select id="food_type" name="food_type[]">{FOODTYPES}</select></td>'+
+     '<td>Тип размещения: <select id="place_type" name="place_type[]">{PLACETYPES}</select></td></tr>';
+     $("#rooms_elements").append(html);
+     }
+
+
+     });*/
+
+
+    function check_birthday() {
+
+        $("#client_table tbody tr").each(function () {
+            var bdate = $(this).find('td:eq(1)').text();
+            var start_date = $("#start_date").val();
+            var end_date = $("#end_date").val();
+            bdate = moment(bdate, "DD.MM.YYYY").set("year", moment(start_date).year()).format("YYYY-MM-DD");
+
+            if (moment(bdate).isBetween(start_date, end_date)) {
+                client_fio = $(this).find('td:eq(0)').text();
+                $("#notify").append("<li> У клиента " + client_fio + " день рожденья во время тура!");
+                $("#notify").show();
+            }
+
+        });
+    }
+    /*
+     $(".pays").dblclick(function(){
+     row_index = $(this).index();
+     p_pay_sum = $(this).find("#pays_sum").val();
+     p_pay_deal_type = $(this).find("#pays_deal_type").val();
+     p_pay_type = $(this).find("#pays_type").val();
+     p_pay_id = $(this).find("#pays_id").val();
+     payEdit(row_index,p_pay_id,p_pay_type,p_pay_deal_type,p_pay_sum,"{DEAL_ID}");
+     });*/
+    $("#pays_table").on("dblclick", ".pays", function () {
+        //$(".pays").on("dblclick",function(){
+        row_index = $(this).index();
+        p_pay_sum = $(this).find("#pays_sum").val();
+        p_pay_deal_type = $(this).find("#pays_deal_type").val();
+        p_pay_type = $(this).find("#pays_type").val();
+        p_pay_id = $(this).find("#pays_id").val();
+        payEdit(row_index, p_pay_id, p_pay_type, p_pay_deal_type, p_pay_sum, "{DEAL_ID}");
+    });
+    $("#pays_table").on("click", ".pay_delete", function () {
+        if (confirm('Вы уверены что хотите удалить этот платеж?')) {
+            var tr = $(this).parent().parent();
+            var pay_id = tr.find("#pays_id").val();
+            if (detect == "EDIT") {
+
+                $.ajax({
+                    type: 'POST',
+                    url: '{MAIN_URL}deals/deals',
+                    data: {
+                        detect: "PAY_DELETE",
+                        pay_id: pay_id,
+                        deal_id: "{DEAL_ID}"
+                    },
+                    success: function () {
+
+                    }
+                })
+            }
+            tr.remove();
+            set_sum();
+        }
+    })
+    $("#notify").draggable();
+    $(".hide_notify").click(function () {
+        $(this).parent().hide();
+    });
+    function call() {
+        var msg = $('#client_add_form').serialize();
+        $.ajax({
+            type: 'POST',
+            url: '{MAIN_URL}dialogs/client_add/',
+            data: msg,
+            success: function (msg) {
+
+                //$('#client_add_div').arcticmodal("close");
+                msg = $.parseJSON(msg);
+                $("#client_table > tbody").append(msg.html);
+                $("#frm").append("<input type=\"hidden\" name=\"clients[]\" value=" + msg.client_id + ">");
+                check_birthday();
+                $('#client_add_form').trigger('reset');
+            },
+            error: function (xhr, str) {
+                alert('Возникла ошибка: ' + xhr.responseCode);
+            }
+        });
+    }
+    /*$("#client_add_form").submit(function(){
+     var msg   = $('#client_add_form').serialize();
+     $.ajax({
+     url: 'dialogs/client_add/?detect=ADD_OK',
+     type: post,
+     data: msg
+
+     });
+     alert($(this));
+     $('#client_add_div').arcticmodal("close");
+     return false;
+     })*/
+    $("#course").keyup(function (event) {
+
+        if (event.keyCode == 188) {
+            $("#course").val($("#course").val().replace(",", "."));
+            $("#course").val().replace("1", "2");
+        }
+        ;
+    });
+    var today = new Date();
+    var detect = '{DETECT}';
+    function showUsd() {
+
+        if ($("#use_usd").prop("checked")) {
+            $(".usd").show();
+            $("#unpayed_ue_s").show();
+            $("#pay_sum_ue_s").show();
+            $("#course").attr("disabled", false);
+            set_sum();
+        } else {
+            $(".usd").hide();
+            $("#unpayed_ue_s").hide();
+            $("#pay_sum_ue_s").hide();
+            $("#course").attr("disabled", true);
+        }
+
+    }
+    showUsd();
+    function formValidate() {
+
+        if ($("#reaction :selected").attr("check_pay") == 1) {
+            sum_rub = $("#sum_rub").val().replace(/ /g, "");
+            sum_rub = parseInt(sum_rub);
+            payed_sum = $("#payed_sum").val().replace(/ /g, "");
+            payed_sum = parseInt(payed_sum);//.toFixed(2);
+            agent_sum_rub = $("#agent_sum_rub").val().replace(/ /g, "");
+            agent_sum_rub = parseInt(agent_sum_rub);
+            agent_payed_sum = $("#agent_payed_sum").val().replace(/ /g, "");
+            agent_payed_sum = parseInt(agent_payed_sum);
+            if (sum_rub != payed_sum) {
+                alert("Не завершены оплаты клиента, невозможно закрыть сделку");
+                return false;
+            }
+
+            if (agent_sum_rub != agent_payed_sum) {
+
+                alert("Не завершены оплаты контрагента, невозможно закрыть сделку");
+                return false;
+            }
+        }
+        ;
+
+        if ($("tr.tourist").length == 0) {
+            alert("Для продолжения необходимо добавить хотя бы одного клиента");
+            return false;
+        }
+
+        if($("#multi_tour").is(":visible") && $("#servicesList tbody tr").length == 0){
+            alert("Не доваблена ни одна услуга");
+            return false;
+
+        }
+
+        if ($("#payer:checked").length == 0) {
+            alert("Не выбран плательщик");
+            return false;
+        }
+        ;
+        /*
+         if ($("#operator").val() == "") {
+         alert("Не указана оператор");
+         return false;
+         }
+         if ($("#countries").val() == "") {
+         alert("Не указана страна прилета");
+         return false;
+         }
+         if ($("#cities").val() == "") {
+         alert("Не указан город прилета");
+         return false;
+         }
+         if ($("#hotels").val() == "") {
+         alert("Не указан отель");
+         return false;
+         }
+         if ($("#sum_rub").val() == "") {
+         alert("Не указана стоимость для туриста");
+         return false;
+         }
+         if ($("#agent_sum_rub").val() == "") {
+         alert("Не указана стоимость для турфирмы");
+         return false;
+         }
+         if ($("#start_date").val() == "") {
+         alert("Не указана дата начала");
+         return false;
+         }
+
+         if ($("#start_date").val() != "") {
+         start_date = new Date($("#start_date").val());
+         if (start_date < today)
+         if (!confirm('Внимание, дата тура раньше текущей даты. Вы уверены что ввели верные данные?'))
+         return false;
+         }*/
+
+        $(".buttons").attr('disabled', 'disabled');
+
+
+    }
+
+    if ("{DETECT}" == "EDIT") {
+        reload_client_list({DEAL_ID});
+        $("#servicesList tr").each(function () {
+            service_num = $(this).attr("service_id");
+            service_name = $(this).find(".service_name").html();
+
+            if (service_num !== undefined)
+                services[service_num] = service_name;
+        })
+
+
+    } else if ($("#client_table tr").length == 1)$("#client_table").hide();
+    function reload_client_list(deal_id) {
+
+        $.ajax({
+            url: '{MAIN_URL}deals/deals',
+            type: 'POST',
+            data: {
+                detect: 'get_client_list',
+                deal_id: deal_id
+
+            },
+            success: function (msg) {
+                if ($("#client_search > tbody").html() != msg) {
+                    $("#client_table > tbody tr").each(function () {
+                        this.remove();
+                    });
+                    $("#client_table > tbody").append(msg);
+                    check_birthday();
+                    if (readonly) {
+                        $("#client_table input").prop("disabled", true);
+                        $(".buttons").hide();
+                    }
+                }
+            }
+        })
+
+
+    }
+
+    function client_add(deal_id, client_id) {
+        $("#client_table").show();
+        if (client_id > 0) {
+
+            $.ajax({
+                url: '{MAIN_URL}deals/deals',
+                type: 'POST',
+                data: {
+                    detect: 'CLIENT_ADD',
+                    deal_id: deal_id,
+                    client_id: client_id
+
+                },
+                success: function (msg) {
+                    msg = $.parseJSON(msg);
+                    if (msg.type == 1) {
+                        deal_id = msg.deal_id;
+                        $("#client_table > tbody").append(msg.html);
+                        $("#frm").append("<input type=\"hidden\" name=\"clients[]\" value=" + client_id + ">");
+                    }
+                    else
+                        reload_client_list(msg.deal_id);
+                    $("#client_select_list_" + client_id).hide();
+                }
+            })
+            return;
+        } else {
+            var url = '/dialogs/client_add/?detect=ADD&deal_id=' + deal_id;
+            $('#client_select').arcticmodal("close");
+            $('#client_add_div').arcticmodal({
+                closeOnEsc: false,
+                closeOnOverlayClick: false,
+            });
+            /*var data = new Array();
+             var win = window.open(url, "Добавить клиента", "width=1200,height=700,location=no");
+             $(win).unload(function() {
+             reload_client_list({DEAL_ID});
+             });*/
+        }
+        /*win.onbeforeunload = function()
+         { alert(1);
+
+         return false;
+         }*/
+        //"status:no;Width=900px;scroll:no;Height=600px;help:no;");
+
+        /*$("#pays_table > tbody").append("<tr><td></td><td>"+pay_type_name+"</td><td>"+pay_sum_ue+"</td><td>"+
+         pay_sum+"</td><td>Не подтверждено</td></tr>");*/
+    }
+
+
+    $(document).ready(function () {
+
+
+        if (readonly) {
+            $("input").prop("readonly", true);
+            $("select").prop("disabled", true);
+            $(".buttons").hide();
+        }
+
+        /*if (detect == "EDIT") {
+         $("#sum_rub").attr("readonly", true);
+         $("#agent_sum_rub").attr("readonly", true);
+         }*/
+
+
+        $('#client_select tbody tr').addClass('visible');
+        $('#client_filter').keyup(function (event) {
+            if ($('#client_filter').val().length > 1) {
+                $.ajax({
+                    url: '{MAIN_URL}deals/deals',
+                    type: 'POST',
+                    data: {
+                        detect: 'get_client_select_list',
+                        deal_id: '{DEAL_ID}',
+                        f_fio: $('#client_filter').val()
+                    },
+                    success: function (msg) {
+                        if ($("#client_search > tbody").html() != msg) {
+                            $("#client_search > tbody tr").each(function () {
+                                this.remove();
+                            });
+                            $("#client_search > tbody").append(msg);
+
+                        }
+                    }
+                })
+            }
+        });
+        /*   $('#client_filter').keyup(function(event) {
+
+         // Если нажат Escape или ничего не введено
+         if (event.keyCode == 27 || $(this).val() == '') {
+         // Если нажат Escape, нужно очистить строку поиска
+         $(this).val('');
+
+         // Отобразим все строки, так как если
+         // ничего не введено, все строки должны быть видны
+         $('#client_select tbody tr').removeClass('visible').show().addClass('visible');
+         }
+
+         // Если введён текст, будем фильтровать
+         else {
+         filter('#client_select tbody tr', $(this).val());
+         }
+
+         });*/
+    });
+    $("#client_select_button").click(function () {
+        $('#client_select').arcticmodal({
+            closeOnEsc: false,
+            closeOnOverlayClick: false,
+        });
+        $.ajax({
+            url: '{MAIN_URL}deals/deals',
+            type: 'POST',
+            data: {
+                detect: 'get_client_select_list',
+                deal_id: '{DEAL_ID}'
+            },
+            success: function (msg) {
+                $("#client_search > tbody").append(msg);
+            }
+        })
+    });
+    function client_del(deal_id, client_id) {
+        if (confirm("Удалить клиента из сделки?")) {
+            $.ajax({
+                url: '{MAIN_URL}deals/deals',
+                type: 'POST',
+                data: {
+                    detect: 'CLIENT_DEL',
+                    deal_id: deal_id,
+                    client_id: client_id
+                },
+                success: function (msg) {
+                    $("#client_list_" + client_id).hide();
+                }
+            })
+        }
+
+
+    }
+
+    function filter(selector, query) {
+        query = $.trim(query); // Обрезать пробелы
+        query = query.replace(/ /gi, '|'); // Добавим ИЛИ к регулярному выражению
+
+        $(selector).each(function () {
+            ($(this).text().search(new RegExp(query, "i")) < 0) ? $(this).hide().removeClass('visible') : $(this).show().addClass('visible');
+        });
+    }
+
+
+    function set_unpayed_sum() {
+        pay_service_id = $("#pay_services").val();
+        client_service_payed = $("#servicesList tr[service_id^=" + pay_service_id + "]").find(".r_client_service_payed").val();
+        agent_service_payed = $("#servicesList tr[service_id^=" + pay_service_id + "]").find(".r_agent_service_payed").val();
+        client_service_cost = $("#servicesList tr[service_id^=" + pay_service_id + "]").find(".r_client_service_cost").val();
+        agent_service_cost = $("#servicesList tr[service_id^=" + pay_service_id + "]").find(".r_agent_service_cost").val();
+
+        if ($("#pay_type").val() == 1) {
+            if ($("#servicesList").is(":visible")) {
+                $("#unpayed_rub").val(client_service_cost - client_service_payed);
+            }
+            else {
+                $("#unpayed_rub").val($("#rest_sum").val());
+                $("#unpayed_ue_s").html($("#rest_sum_ue").html() + ' / USD');
+            }
+        }
+        if ($("#pay_type").val() == 2) {
+            if ($("#servicesList").is(":visible")) {
+                $("#unpayed_rub").val(agent_service_cost - agent_service_payed);
+            }
+            else {
+                $("#unpayed_rub").val($("#agent_rest_sum").val());
+                $("#unpayed_ue_s").html($("#agent_rest_sum_ue").html() + ' / USD');
+            }
+        }
+
+        $("#unpayed_rub").trigger("keyup");
+    }
+
+    function set_pay_sum(a) {
+        var unpayed = $("#unpayed_rub").val();
+        var pay_course = $("#course").val();
+        if (pay_course == 0)
+            pay_course = 1;
+        /*if (unpayed > 0 && course > 0) {
+         //$("#unpayed_rub").val(unpayed*pay_course);
+         if (a == 1)
+         $("#pay_sum").val(unpayed);
+         $("#pay_sum_ue_s").html(($("#pay_sum").val() / course).toFixed(2) + ' / USD');
+         }*/
+    }
+
+
+    /* $("#pay_course").change(function(){
+     set_pay_sum();
+     });
+
+     $("#unpayed").change(function(){
+     set_pay_sum();
+     });
+
+     $("#pay_course").keyup(function(){
+     set_pay_sum();
+     });
+
+     $("#unpayed").keyup(function(){
+     set_pay_sum();
+     });*/
+
+    $("#pay_services").change(function () {
+        set_unpayed_sum()
+    });
+    $(document).on("click","#pay_add_close",function () {
+
+        var new_pay_id = 0;
+        var use_usd = $("#use_usd").prop("checked");
+        var pay_sum = parseFloat($("#pay_sum").val().replace(/ /g, ""));
+        var pay_service_id = $("#pay_services").val();
+        var pay_service_name = $("#pay_services :selected").text();
+        service_row = $("#servicesList tr[service_id^=" + pay_service_id + "]");
+        cur_sum = service_row.find(".r_client_service_payed").val();
+        cur_agent_sum = service_row.find(".r_agent_service_payed").val();
+        if (!pay_sum) {
+            alert("Не заполнена сумма платежа");
+            return;
+        }
+        //var course = parseFloat($("#course").val());
+        course = 0;
+        if (use_usd)
+            var pay_sum_ue = parseFloat((pay_sum / course).toFixed(2));
+        var pay_type = $("#pay_type").val();
+        var deal_pay_type = $("#deal_pay_type").val();
+        var pay_type_name;
+        if (pay_type == 1)
+            pay_type_name = "От клиента";
+        else
+            pay_type_name = "Контрагенту";
+        if (detect == "EDIT") {
+            $.ajax({
+                url: '{MAIN_URL}deals/deals/',
+                type: 'POST',
+                data: {
+                    detect: 'PAY_ADD',
+                    deal_id: '{DEAL_ID}',
+                    sum_rub: pay_sum,
+                    course: course,
+                    pay_type: pay_type,
+                    deal_pay_type: deal_pay_type
+                },
+                success: function (msg) {
+                    msg = $.parseJSON(msg);
+                    new_pay_id = msg.pay_id;
+
+
+                }
+            });
+        }
+
+        today = new Date();
+        pay_info = "<tr class='pay_type_" + pay_type + " pays'  ><td>" + today.format("dd.mm.yyyy") + " <input type='hidden' name=pays_service_id[] id=pays_service_id></td>";
+//			pay_info += "<td>"+pay_service_name+" </td>";
+        pay_info += "<td>" + pay_type_name + " " + pay_service_name + " <input type='hidden' name=pays_type[] id=pays_type value=" + pay_type + ">  <input type='hidden' name=deal_pays_type[] id=deal_pays_type value=" + deal_pay_type + "></td>";
+        if (use_usd)
+            pay_info += "<td class='usd'>" + pay_sum_ue + "</td>";
+        pay_info += "<td class='pay_sum'>" + pay_sum.toFixed(2) + " <input type='hidden' name=pays_sum[] id=pays_sum value=" + pay_sum + "></td><td>Не подтверждено<img src=\"{IMG_URL}del.gif\" class=\"pay_delete\"></td> <input type='hidden' id=pays_id value=" + new_pay_id + "></tr>";
+        $("#pays_table > tbody").append(pay_info);
+        //$("#pays_table > tbody").append("<tr><td></td><td>"+pay_type_name+"</td><td>"+pay_sum_ue+"</td><td>"+pay_sum+"</td><td>Не подтверждено</td></tr>");
+
+        if (pay_type == 1) {
+            $("#payed_sum").val(parseFloat($("#payed_sum").val().replace(/ /g, "")) + parseFloat(pay_sum));
+            $("#rest_sum").val(parseFloat($("#rest_sum").val().replace(/ /g, "")) - pay_sum);
+            $("#payed_sum").trigger("keyup");
+            $("#rest_sum").trigger("keyup");
+            if (use_usd) {
+
+                $("#payed_sum_ue").html((parseFloat($("#payed_sum_ue").html()) + parseFloat(pay_sum_ue)).toFixed(2));
+                if ((parseFloat($("#rest_sum_ue").html()) - pay_sum_ue).toFixed(0) == 0) {
+                    $("#rest_sum_ue").html((parseFloat($("#rest_sum_ue").html()) - pay_sum_ue).toFixed(0))
+                }
+                else
+                    $("#rest_sum_ue").html((parseFloat($("#rest_sum_ue").html()) - pay_sum_ue).toFixed(2));
+                //$("#rest_sum_ue").html((parseFloat($("#rest_sum_ue").html())-parseFloat(pay_sum_ue)).toFixed(2));
+            }
+            service_row.find(".r_client_service_payed").val(parseFloat(cur_sum) + parseFloat(pay_sum));
+            service_row.find(".client_service_payed").html(parseFloat(cur_sum) + parseFloat(pay_sum));
+        }
+        if (pay_type == 2) {
+            $("#agent_payed_sum").val(parseFloat($("#agent_payed_sum").val().replace(/ /g, "")) + pay_sum);
+            $("#agent_rest_sum").val(parseFloat($("#agent_rest_sum").val().replace(/ /g, "")) - pay_sum);
+            $("#agent_payed_sum").trigger("keyup");
+            $("#agent_rest_sum").trigger("keyup");
+            if (use_usd) {
+                $("#agent_payed_sum_ue").html((parseFloat($("#agent_payed_sum_ue").html()) + parseFloat(pay_sum_ue)).toFixed(2));
+                //$("#agent_payed_sum_ue").html((parseFloat($("#agent_payed_sum_ue").html()+parseFloat(pay_sum_ue))).toFixed(2));
+                if ((parseFloat($("#agent_rest_sum_ue").html()) - pay_sum_ue).toFixed(0) == 0) {
+                    $("#agent_rest_sum_ue").html((parseFloat($("#agent_rest_sum_ue").html()) - pay_sum_ue).toFixed(0))
+                }
+                else
+                    $("#agent_rest_sum_ue").html((parseFloat($("#agent_rest_sum_ue").html()) - pay_sum_ue).toFixed(2));
+            }
+            service_row.find(".agent_service_payed").html(parseFloat(cur_agent_sum) + parseFloat(pay_sum));
+            service_row.find(".r_agent_service_payed").val(parseFloat(cur_agent_sum) + parseFloat(pay_sum));
+        }
+        $("#pay_sum").val("");
+
+        /*$("#pay_add_div :input").each(function () {
+         $(this).val("");
+         });*/
+
+        $("#pay_add_div").arcticmodal("close");
+    });
+
+
+    function payAdd(type) {
+        //$("#pay_add").click(function(){
+        $('#pay_add_div').arcticmodal({
+            closeOnEsc: false,
+            closeOnOverlayClick: false,
+            type: 'ajax',
+            url: '{MAIN_URL}dialogs/pay_add',
+            afterLoadingOnShow: function(data, el) {
+                $("#pay_services").html("");
+                for (i in services) {
+                    $("#pay_services").append($("<option value = " + i + "> " + services[i] + "</option>"));
+                    //s_opt += "<option value = " + i + "> " + services[i] + "</option>";
+                }
+                $("#pay_type [value='"+type+"']").attr("selected", "selected");
+                set_pay_sum(1);
+                if ({DEAL_ID} > 0)
+                    $.ajax({
+                        url: '{MAIN_URL}deals/deals',
+                        type: 'POST',
+                        data: {
+                            detect: 'get_pay_info',
+                            deal_id: '{DEAL_ID}'
+                        },
+                        success: function (msg) {
+                            var deal_sums = $.parseJSON(msg);
+                        }
+                    })
+
+                set_unpayed_sum();
+                $("#pay_add_close").show()
+                $("#pay_edit_close").hide()
+            },
+        });
+
+
+    }
+    ;
+
+    function payEdit(row_index, p_pay_id, p_pay_type, p_pay_deal_type, p_pay_sum, deal_id) {
+        //$("#pay_add").click(function(){
+
+        pay_type.setValue(p_pay_type);
+        set_unpayed_sum();
+        $("#deal_pay_type  [value='" + p_pay_deal_type + "']").attr("selected", "selected");
+        $("#pay_sum").val(p_pay_sum);
+        $("#pay_add_close").hide()
+        $("#pay_edit_close").show()
+
+
+        $('#pay_add_div').arcticmodal({
+            closeOnEsc: false,
+            closeOnOverlayClick: false,
+        });
+
+        $("#pay_edit_close").click(function () {
+            $("#pay_add_div").arcticmodal("close");
+            if (p_pay_id > 0) {
+                $.ajax({
+                    url: '{MAIN_URL}deals/deals',
+                    type: 'POST',
+                    data: {
+                        detect: 'PAY_EDIT',
+                        pay_id: p_pay_id,
+                        pay_type: $("#pay_type").val(),
+                        pay_deal_type: $("#pay_deal_type").val(),
+                        pay_sum: $("#pay_sum").val(),
+                        deal_id: deal_id
+                    },
+                    success: function (msg) {
+                        $("#pay_sum").val("");
+                    }
+                })
+            }
+            row_index = row_index + 1;
+            row = $("#pays_table tr:nth-child(" + row_index + ")");
+
+            row.find("td.pay_sum").html($("#pay_sum").val());
+            set_sum();
+
+        })
+
+
+    }
+    ;
+
+    function set_sum(type) {
+        var client_pay_sum = 0;
+        var agent_pay_sum = 0;
+        var sum_rub = $("#sum_rub").val().replace(/ /g, "");
+        var sum_rub_a = $("#agent_sum_rub").val().replace(/ /g, "");
+        $("#pays_table tbody tr.pay_type_1").each(function () {
+            a = $(this).find('td.pay_sum').text().replace(/ /g, "");
+
+            client_pay_sum = client_pay_sum + parseFloat(a);
+
+        });
+        $("#pays_table tbody tr.pay_type_2").each(function () {
+            a = $(this).find('td.pay_sum').text().replace(/ /g, "");
+            agent_pay_sum = agent_pay_sum + parseFloat(a);
+            //agent_pay_sum = $(this).find('td.pay_sum').text();
+
+        });
+        $("#pays_table tbody tr.pay_type_5").each(function () {
+            a = $(this).find('td.pay_sum').text().replace(/ /g, "");
+            client_pay_sum = client_pay_sum - parseFloat(a);
+            //agent_pay_sum = $(this).find('td.pay_sum').text();
+
+        });
+        $("#pays_table tbody tr.pay_type_6").each(function () {
+            a = $(this).find('td.pay_sum').text().replace(/ /g, "");
+            agent_pay_sum = agent_pay_sum + parseFloat(a);
+            //agent_pay_sum = $(this).find('td.pay_sum').text();
+
+        });
+        $("#payed_sum").val(client_pay_sum.toFixed(2));
+        $("#agent_payed_sum").val(agent_pay_sum.toFixed(2));
+        if (detect == "ADD") {
+            $("#rest_sum").val(sum_rub);
+            $("#agent_rest_sum").val(sum_rub_a);
+        }
+        else {
+            $("#rest_sum").val(sum_rub - client_pay_sum);
+            $("#agent_rest_sum").val(sum_rub_a - agent_pay_sum);
+        }
+        $("#profit").val(sum_rub - sum_rub_a);
+        $("#profit").trigger("keyup");
+    }
+    /*	
+     function set_sum(type) {
+     var client_pay_sum = 0;
+     var agent_pay_sum = 0;
+     $("#pays_table tbody tr.pay_type_1").each(function() {
+     a = $(this).find('td.pay_sum').text().replace(/ /g, "");
+
+     client_pay_sum = client_pay_sum + parseFloat(a);
+
+     });
+     $("#pays_table tbody tr.pay_type_2").each(function() {
+     a = $(this).find('td.pay_sum').text().replace(/ /g, "");
+
+     client_pay_sum = client_pay_sum + parseFloat(a);
+     agent_pay_sum = $(this).find('td.pay_sum').text();
+
+     });
+
+     course = $("#course").val();
+     sum_rub = $("#sum_rub").val().replace(/ /g, "");
+     //course = $("#course").val();
+     payed_sum = $("#payed_sum").val().replace(/ /g, "");
+     sum_rub_a = $("#agent_sum_rub").val().replace(/ /g, "");
+     //course = $("#agent_course").val();
+     payed_sum_a = $("#agent_payed_sum").val().replace(/ /g, "");
+     if ((type !== 1 && type != 2) || type == 1) {
+
+
+     if (sum_rub > 0 && course > 0 || !$("#use_usd").prop("checked")) {
+
+     if (detect == "ADD") {
+     $("#full_sum_ue").html((sum_rub / course).toFixed(2));
+     $("#rest_sum_ue").html((sum_rub / course).toFixed(2));
+     $("#p_sum_usd").html((sum_rub / course).toFixed(2) + ' USD');
+     $("#sum_ue").val((sum_rub / course).toFixed(2));
+     $("#rest_sum").val(sum_rub);
+     //$("#rest_sum").trigger("keyup");
+     } else {
+     //$("#rest_sum").val(Math.round(($("#rest_sum_ue").html()*course)));
+     //$("#rest_sum").val(($("#rest_sum_ue").html() * course).toFixed(0));
+     }
+
+
+     }
+     }
+     if ((type !== 1 && type != 2) || type == 2) {
+
+
+     if (sum_rub_a > 0 && course > 0 || !$("#use_usd").prop("checked")) {
+     //$("#agent_rest_sum_ue").html((sum_rub_a/course).toFixed(2));
+     if (detect == "ADD") {
+     $("#agent_full_sum_ue").html((sum_rub_a / course).toFixed(2));
+     $("#agent_rest_sum_ue").html((sum_rub_a / course).toFixed(2));
+     $("#agent_sum_ue").val((sum_rub_a / course).toFixed(2));
+     $("#agent_rest_sum").val(sum_rub_a);
+     $("#agent_rest_sum").trigger("keyup");
+     } else {
+     //$("#agent_rest_sum").val(Math.round(parseFloat(($("#agent_rest_sum_ue").html()*course))));
+     //$("#agent_rest_sum").val(($("#agent_rest_sum_ue").html() * course).toFixed(0));
+     }
+
+
+     }
+     }
+     if (sum_rub > 0 && sum_rub_a > 0) {
+
+     $("#profit").val(sum_rub - sum_rub_a);
+     $("#profit").trigger("keyup");
+     }
+
+     }
+     ;*/
+    set_sum();
+    var xhr;
+    var cities, $cities;
+    var countries, $countries;
+    var hotels, $hotels;
+    //Начала функций для блока тура
+
+    $("#start_date").change(function () {
+        set_end_date();
+    });
+    function set_end_date() {
+        var end_date = new Date($("#start_date").val());
+        var nights = $("#nights").val();
+        if (end_date != "undefined" && nights > 0) {
+            end_date.setDate(end_date.getDate() + Number(nights));
+            end_date = end_date.format("yyyy-mm-dd");
+            $("#end_date").val(end_date);
+        }
+    }
+    ;
+    $(document).on("change", "#nights", function () {
+        set_end_date();
+    })
+    /*$("#nights").change(function() {
+     set_end_date();
+     });*/
+    $("submit").button();
+    $("button").button();
+
+
+    function createSelectize(city_id, hotel_id, arr_country_id, dep_city_id, dep_airport_id, arr_city_id, arr_airport_id) {
+
+        if ($('#operator').is(":visible")) {
+            $operators = $('#operator').selectize({
+                create: true,
+                valueField: 'operator_id',
+                labelField: 'name',
+                /*  sortField: {
+                 field: 'text',
+                 direction: 'asc'
+                 },*/
+                dropdownParent: 'body'
+            });
+            operators = $operators[0].selectize;
+            if (readonly) operators.disable();
+        }
+
+        if ($('#countries').is(":visible")) {
+            $countries = $('#countries').selectize({
+                valueField: 'country_id',
+                labelField: 'name',
+                searchField: ['name'],
+                create: true,
+
+                dropdownParent: 'body',
+                onItemAdd: function (value, item) {
+
+                },
+                onChange: function (value) {
+                    //if (value==0) return;
+                    cities.disable();
+                    hotels.disable();
+                    cities.clearOptions();
+                    hotels.clearOptions();
+                    //
+                    cities.load(function (callback) {
+                        xhr && xhr.abort();
+                        xhr = $.ajax({
+                            url: '{MAIN_URL}deals/deals?detect=get_cities&country_id=' + value,
+                            success: function (results) {
+
+                                cities.enable();
+                                callback($.parseJSON(results));
+                                if (city_id > 0) cities.setValue(city_id);
+
+                            },
+                            error: function () {
+                                callback();
+                            }
+                        })
+                    });
+
+                }
+            });
+            countries = $countries[0].selectize;
+            countries.load(function (callback) {
+                xhr && xhr.abort();
+                xhr = $.ajax({
+                    url: '{MAIN_URL}deals/deals?detect=get_countries',
+                    success: function (results) {
+                        callback($.parseJSON(results));
+                    },
+                    error: function () {
+                        callback();
+                    }
+                })
+
+            });
+            if (readonly) countries.disable();
+        }
+
+        if ($('#cities').is(":visible")) {
+            $cities = $('#cities').selectize({
+                create: true,
+                valueField: 'city_id',
+                labelField: 'name',
+                searchField: ['name'],
+                // sortField: [[]],
+                /*sortField: {
+                 field: 'name',
+                 direction: 'asc'
+                 },*/
+                onChange: function (value) {
+                    if (value == 0)
+                        return;
+                    hotels.disable();
+                    hotels.clearOptions();
+                    //
+                    hotels.load(function (callback) {
+                        xhr && xhr.abort();
+                        xhr = $.ajax({
+                            url: '{MAIN_URL}deals/deals?detect=get_hotels&country_id=' + $countries.val() + '&city_id=' + value,
+                            success: function (results) {
+
+                                hotels.enable();
+                                callback($.parseJSON(results));
+                                if (hotel_id > 0) hotels.setValue(hotel_id);
+                            },
+                            error: function () {
+                                callback();
+                            }
+                        })
+                    });
+                }
+
+
+            });
+            cities = $cities[0].selectize;
+            if (readonly) cities.disable();
+        }
+
+        if ($('#hotels').is(":visible")) {
+            $hotels = $('#hotels').selectize({
+                create: true,
+                valueField: 'hotel_id',
+                labelField: 'name',
+                searchField: ['name'],
+                /*sortField: {
+                 field: 'name',
+                 direction: 'asc'
+                 },*/
+                dropdownParent: 'body'
+            });
+            hotels = $hotels[0].selectize;
+            if (readonly) hotels.disable();
+        }
+
+
+        //Конец блока тура
+
+        //Начало блока билета
+
+        if ($('#dep_countries').is(":visible")) {
+            $dep_countries = $('#dep_countries').selectize({
+                valueField: 'country_id',
+                labelField: 'name',
+                searchField: ['name'],
+                create: true,
+                /* sortField: {
+                 field: 'text',
+                 direction: 'asc'
+                 },*/
+                dropdownParent: 'body',
+                onItemAdd: function (value, item) {
+
+                },
+                onChange: function (value) {
+                    //if (value==0) return;
+                    dep_cities.disable();
+                    dep_airports.disable();
+                    dep_cities.clearOptions();
+                    dep_airports.clearOptions();
+                    //
+                    dep_cities.load(function (callback) {
+                        xhr && xhr.abort();
+                        xhr = $.ajax({
+                            async: false,
+                            url: '{MAIN_URL}deals/deals?detect=get_cities&country_id=' + value,
+                            success: function (results) {
+
+                                dep_cities.enable();
+                                callback($.parseJSON(results));
+                                if (dep_city_id > 0) dep_cities.setValue(dep_city_id);
+                            },
+                            error: function () {
+                                callback();
+                            }
+                        })
+                    });
+                }
+            });
+            dep_countries = $dep_countries[0].selectize;
+            /*dep_countries.load(function(callback) {
+             xhr && xhr.abort();
+             xhr = $.ajax({
+             url: '{MAIN_URL}deals/deals?detect=get_countries',
+             success: function(results) {
+             callback($.parseJSON(results));
+             },
+             error: function() {
+             callback();
+             }
+             })
+
+             });*/
+            if (readonly) dep_countries.disable();
+        }
+
+        if ($('#dep_cities').is(":visible")) {
+            $dep_cities = $('#dep_cities').selectize({
+                create: true,
+                valueField: 'city_id',
+                labelField: 'name',
+                searchField: ['name'],
+
+                onChange: function (value) {
+                    if (value == 0)
+                        return;
+                    dep_airports.disable();
+                    dep_airports.clearOptions();
+                    //
+                    dep_airports.load(function (callback) {
+
+                        xhr && xhr.abort();
+
+                        xhr = $.ajax({
+                            url: '{MAIN_URL}deals/deals?detect=get_airports&city_id=' + value,
+                            success: function (results) {
+
+                                dep_airports.enable();
+                                callback($.parseJSON(results));
+                                if (dep_airport_id > 0) dep_airports.setValue(dep_airport_id);
+                            },
+                            error: function () {
+                                callback();
+                            }
+                        })
+                    });
+                }
+
+
+            });
+            dep_cities = $dep_cities[0].selectize;
+            if (readonly) dep_cities.readonly;
+        }
+
+        if ($('#dep_airports').is(":visible")) {
+            $dep_airports = $('#dep_airports').selectize({
+                create: true,
+                valueField: 'airport_id',
+                labelField: 'name',
+                searchField: ['name'],
+                sortField: {
+                    field: 'name',
+                    direction: 'asc'
+                },
+                dropdownParent: 'body'
+            });
+            dep_airports = $dep_airports[0].selectize;
+            if (readonly) dep_airports.disable();
+        }
+
+        if ($('#arr_countries').is(":visible")) {
+            $arr_countries = $('#arr_countries').selectize({
+                valueField: 'country_id',
+                labelField: 'name',
+                searchField: ['name'],
+                create: true,
+                /* sortField: {
+                 field: 'text',
+                 direction: 'asc'
+                 },*/
+                dropdownParent: 'body',
+                onItemAdd: function (value, item) {
+
+                },
+                onChange: function (value) {
+                    //if (value==0) return;
+                    arr_cities.disable();
+                    arr_airports.disable();
+                    arr_cities.clearOptions();
+                    arr_airports.clearOptions();
+                    //
+                    arr_cities.load(function (callback) {
+                        xhr && xhr.abort();
+                        xhr = $.ajax({
+                            async: false,
+                            url: '{MAIN_URL}deals/deals?detect=get_cities&country_id=' + value,
+                            success: function (results) {
+
+                                arr_cities.enable();
+                                callback($.parseJSON(results));
+                                if (arr_city_id > 0) arr_cities.setValue(arr_city_id);
+                            },
+                            error: function () {
+                                callback();
+                            }
+                        })
+                    });
+                }
+            });
+            arr_countries = $arr_countries[0].selectize;
+
+            /* arr_countries.load(function(callback){
+             xhr && xhr.abort();
+             xhr = $.ajax({
+             url: '{MAIN_URL}deals/deals?detect=get_countries&t',
+             success: function(results) {
+
+             callback($.parseJSON(results));
+             },
+             error: function() {
+             callback();
+             }
+             })
+
+             });*/
+            if (readonly) arr_countries.disable();
+        }
+
+        if ($('#arr_cities').is(":visible")) {
+            $arr_cities = $('#arr_cities').selectize({
+                create: true,
+                valueField: 'city_id',
+                labelField: 'name',
+                searchField: ['name'],
+                /*  sortField: {
+                 field: 'name',
+                 direction: 'asc'
+                 },*/
+                onChange: function (value) {
+                    if (value == 0)
+                        return;
+                    arr_airports.disable();
+                    arr_airports.clearOptions();
+                    //
+                    arr_airports.load(function (callback) {
+                        xhr && xhr.abort();
+                        xhr = $.ajax({
+                            url: '{MAIN_URL}deals/deals?detect=get_airports&city_id=' + value,
+                            success: function (results) {
+
+                                arr_airports.enable();
+                                callback($.parseJSON(results));
+                                if (arr_airport_id > 0) arr_airports.setValue(arr_airport_id);
+                            },
+                            error: function () {
+                                callback();
+                            }
+                        })
+                    });
+                }
+
+
+            });
+            arr_cities = $arr_cities[0].selectize;
+            if (readonly) arr_cities.disable();
+        }
+
+        if ($('#arr_airports').is(":visible")) {
+            $arr_airports = $('#arr_airports').selectize({
+                create: true,
+                valueField: 'airport_id',
+                labelField: 'name',
+                searchField: ['name'],
+                sortField: {
+                    field: 'name',
+                    direction: 'asc'
+                },
+                dropdownParent: 'body'
+            });
+            arr_airports = $arr_airports[0].selectize;
+            if (readonly) arr_airports.disable();
+        }
+
+
+        //cities.disable();
+        //hotels.disable();
+        if ($('#room_type').is(":visible")) {
+            $roomtypes = $('#room_type').selectize({
+                valueField: 'room_type_id',
+                labelField: 'name',
+                searchField: ['name'],
+                create: true,
+                onOptionAdd: function (value, data) {
+                    $.ajax({
+                        url: '{MAIN_URL}admin/directories/',
+                        data: {
+                            detect: "ADD_ROOM_TYPE",
+                            room_type_short_name: value,
+                            manual: 1
+                        },
+                        success: function (results) {
+                            results = $.parseJSON(results);
+                            //alert(results.room_type_id);
+                            $('#room_type option:selected').val(results.room_type_id)
+
+
+                        },
+                        error: function () {
+                            callback();
+                        }
+                    })
+
+                }
+            });
+            roomtypes = $roomtypes[0].selectize;
+
+
+            if (readonly) roomtypes.disable();
+        }
+        if ($('#food_type').is(":visible")) {
+            $foodtypes = $('#food_type').selectize({
+                valueField: 'food_type_id',
+                labelField: 'name',
+                searchField: ['name'],
+                create: true,
+                onOptionAdd: function (value, data) {
+                    $.ajax({
+                        url: '{MAIN_URL}admin/directories/',
+                        data: {
+                            detect: "ADD_FOOD_TYPE",
+                            food_type_short_name: value,
+                            manual: 1
+                        },
+                        success: function (results) {
+                            results = $.parseJSON(results);
+                            //alert(results.room_type_id);
+                            $('#food_type option:selected').val(results.food_type_id)
+
+
+                        },
+                        error: function () {
+                            callback();
+                        }
+                    })
+
+                }
+            });
+            foodtypes = $foodtypes[0].selectize;
+            if (readonly) foodtypes.disable();
+        }
+        if ($('#place_type').is(":visible")) {
+            $placetypes = $('#place_type').selectize({
+                valueField: 'place_type_id',
+                labelField: 'name',
+                searchField: ['name'],
+                create: true,
+                onOptionAdd: function (value, data) {
+                    if (confirm("Добавить новый тип?"))
+                        $.ajax({
+                            url: '{MAIN_URL}admin/directories/',
+                            data: {
+                                detect: "ADD_PLACE_TYPE",
+                                place_type_short_name: value,
+                                manual: 1
+                            },
+                            success: function (results) {
+                                results = $.parseJSON(results);
+                                //alert(results.room_type_id);
+                                $('#place_type option:selected').val(results.place_type_id)
+
+
+                            },
+                            error: function () {
+                                callback();
+                            }
+                        })
+
+                }
+            });
+            placetypes = $placetypes[0].selectize;
+            if (readonly) placetypes.disable();
+        }
+    }
+    createSelectize();
+    function client_edit(client_id) {
+        var data = new Array();
+        var url = '/dialogs/client_add/?detect=EDIT&client_id=' + client_id;
+        var win = window.open(url, "Редактирование клиента", "width=1200,height=700,location=no");
+
+        $(win).unload(function () {
+            if (detect == "EDIT") reload_client_list({DEAL_ID});
+        });
+    }
+
+
+    // УСЛУГИ
+    /////////
+
+    function birthDateToAge(birth) {
+        var now = new Date();
+        date = new Date(birth.replace(/(\d+)-(\d+)-(\d+)/, '$2/$3/$1'))
+        age = now.getFullYear() - date.getFullYear();
+        age = now.setFullYear(1972) < date.setFullYear(1972) ? age - 1 : age;
+        document.getElementById("age").innerHTML = '<b>Возраст: <span id="full_age">' + age + '</span></b>'; //now.setFullYear(1972) < date.setFullYear(1972) ? age - 1 : age; 
+    }
+
+    function Numbers(e) {
+        /* функция не даёт писать в поле ничего кроме цифр */
+        var keynum;
+        var keychar;
+        var numcheck;
+        if (window.event) { // IE
+            keynum = e.keyCode;
+        } else if (e.which) { // Netscape/Firefox/Opera
+            keynum = e.which;
+        }
+        keychar = String.fromCharCode(keynum);
+        numcheck = /\d/;
+        return numcheck.test(keychar) || keynum < 32;
+    }
+    var clientCheck = 0;
+    function client_frm_check(f) {
+
+        var today = new Date();
+        if ($("#full_age").html() > 75) {
+            alert("Внимание возраст клиента больше 75 лет");
+            return false;
+        }
+
+        if (f.lname.value.length == 0) {
+            alert("Не указана ФАМИЛИЯ клиента");
+            return false;
+        }
+
+        if (f.fname.value.length == 0) {
+            alert("Не указано ИМЯ клиента");
+            return false;
+        }
+
+        if (clientCheck == 1) {
+            if (!confirm('Клиент с таким ФИО уже существует. Продолжить?')) {
+                return false;
+            }
+
+        }
+
+        /*
+         if(f.f_pass_ser.value.length==0){
+         alert("Не указана серия загранпаспорта");
+         return false;
+
+         }
+
+         if(f.f_pass_num.value.length==0){
+         alert("Не указан номер загранпаспорта");
+         return false;
+
+         }
+
+         if(f.f_pass_issue_place.value.length==0){
+         alert("Не указано место выдачи загранпаспорта");
+         return false;
+
+         }
+
+         if(f.f_pass_issue_date.value.length==0){
+         alert("Не указана дата выдачи загранпаспорта");
+         return false;
+
+         }
+
+         if(f.f_pass_end_date.value.length==0){
+         alert("Не указана дата окончания загранпаспорта");
+         return false;
+
+         }*/
+        end_date = new Date(f.f_pass_end_date.value);
+        if (end_date < today) {
+
+            alert("Загранпаспорт просрочен");
+            return false;
+        }
+        /*window.opener(reload_client_list());    
+         window.close();*/
+
+    }
+
+    //Транслитерация кириллицы в URL
+    function transl(str, type) {
+        if (type == 1) {
+            document.getElementById("eng_lname").value = urlRusLat(str);
+        }
+        if (type == 2) {
+            document.getElementById("eng_fname").value = urlRusLat(str);
+        }
+
+
+    }
+
+    $(document).ready(function () {
+        $('#mob_phone').mask("+7(999) 999-9999");
+    });
+    function checkClient(client_id) {
+        fname = document.getElementById("fname").value;
+        lname = document.getElementById("lname").value;
+        mname = document.getElementById("mname").value;
+        if (fname != '' && lname != '' && mname != '') {
+            $.ajax({
+                url: '{MAIN_URL}clients/clientlist/',
+                type: 'POST',
+                data: {
+                    detect: 'check_client',
+                    lname: lname,
+                    fname: fname,
+                    mname: mname,
+                    client_id: client_id
+                },
+                success: function (msg) {
+                    if (msg == 1) {
+                        $("#error").html("Внимание! Клиент с таким ФИО уже существует!");
+                        $("#error").show();
+                        clientCheck = 1;
+                    } else {
+                        $("#error").hide();
+                        clientCheck = 0;
+                    }
+
+                }
+            });
+        } else
+            $("#error").hide();
+    }
+
+
+</script>
+
+<!-- END client_form -->
+
+
+{foot}

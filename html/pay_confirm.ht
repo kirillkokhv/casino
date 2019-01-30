@@ -1,0 +1,322 @@
+{head}
+{main_top}
+<!-- BEGIN pays_form -->
+<div id="pays_filters" class="filters">
+    <img src="{IMG_URL}filter.png" class="filters_img">
+
+    <form id="filters_form" method="POST" action="{MAIN_URL}admin/pay_confirm">
+        <div>
+            <div class="filter_element">
+                Номер договора: <br><input type="text" name="f_deal_id" value="{F_DEAL_ID}">
+            </div>
+            <div class="filter_element">
+                ФИО плательщика: <br><input type="text" name="f_customer_fio" value="{F_CUSTOMER_FIO}">
+            </div>
+            <div class="filter_element">
+                Дата платежа с: <br><input type="date" name="f_pay_date_begin" value="{F_PAY_DATE_BEGIN}">
+                по <input type="date" name="f_pay_date_end" value="{F_PAY_DATE_END}">
+            </div>
+            <div class="filter_element" style="    margin-top: 20px;">
+                Отображать подтвержденные <input type="checkbox" name="show_confirmed" {SHOW_CONFIRMED} value="1">
+            </div>
+            <input type="hidden" name="detect" value="SEARCH">
+            <img src="{IMG_URL}search.png" onclick="filters_form.submit()">
+
+        </div>
+
+
+    </form>
+
+</div>
+<div class="main_form">
+    <div class="row_count">
+        Найдено записей: {NUM_ROWS}
+    </div>
+    <div class="main_table">
+        <table id="pays_table">
+            <thead>
+            <th>
+                Сделка
+            </th>
+            <th>
+                Дата платежа
+            </th>
+            <th>
+                Тип платежа
+            </th>
+            <th>
+                Плательщик
+            </th>
+            <th>
+                Услуга
+            </th>
+
+            <th>
+                Сумма руб.
+            </th>
+            <th>
+                Способ платежа
+            </th>
+            <th>
+                Принято
+            </th>
+            <th>
+                Подтверждено
+            </th>
+            <th></th>
+            </thead>
+            <tbody>
+            <!-- BEGIN pays_list -->
+            <tr>
+                <td>
+                    <a href="{MAIN_URL}deals/deals?detect=EDIT&id={DEAL_ID}">№ {DEAL_ID}</a><br>
+                </td>
+                <td>
+                    {PAY_DATE}
+                </td>
+                <td>
+                    {PAY_TYPE}
+                </td>
+                <td>
+                    {CUSTOMER_FIO}
+                </td>
+                <td>
+                    {DEAL_TYPE} {DEAL_NAME}
+                </td>
+
+                <td style="color:#34c0a8">
+                    {SUM_RUB}
+                </td>
+                <td>
+                    {DEAL_PAY_TYPE}
+                </td>
+                <td>
+                    {MANAGER_FIO}
+                </td>
+                <td>
+                    {CONFIRM}
+                </td>
+                <td>
+                    <!-- BEGIN pay_confirmed -->
+                    <a href="#"><img src="{IMG_URL}but_success.gif"></a>
+                    <!-- END pay_confirmed -->
+                    <!-- BEGIN pay_unconfirmed -->
+                    <a href="#" onclick="pay_confirm({PAY_ID})"> <img src="{IMG_URL}quest.png"></a>
+                    <!-- END pay_unconfirmed -->
+                </td>
+            </tr>
+            <!-- END pays_list -->
+            </tbody>
+
+        </table>
+    </div>
+    {NAVIGATION}
+</div>
+
+</div>
+
+
+
+<div id="dialog-confirm" title="ПОДТВЕРЖДЕНИЕ ПЛАТЕЖА" style="display: none">
+    <p><img src="{IMG_URL}warn.png" style="float:left; margin:0 7px 20px 0;">Подтвердить платеж?</p>
+    <img src="{IMG_URL}cancel.png" class="cancel">
+    <img src="{IMG_URL}accept.png" class="accept">
+
+
+
+</div>
+<!-- END pays_form -->
+<script type="text/javascript">
+    $(".cancel").click(function () {
+        $("#dialog-confirm").dialog("close");
+    })
+
+    $(".accept").click(function () {
+        pay_id = $("#dialog-confirm").attr("pay_id");
+        var msg = $('#filters_form').serialize();
+        $.ajax({
+            type: 'POST',
+            url: '{MAIN_URL}admin/pay_confirm/',
+            data: {
+                detect: "PAY_CONFIRM_OK",
+                pay_id: pay_id,
+                msg
+            },
+            success: function (msg) {
+                //msg = $.parseJSON(msg);
+                $("#pays_table > tbody tr").each(function () {
+                    this.remove();
+                });
+                $("#pays_table > tbody").append(msg);
+
+            },
+            error: function (xhr, str) {
+                alert('Возникла ошибка: ' + xhr.responseCode);
+            }
+        });
+        $("#dialog-confirm").dialog("close");
+    })
+    function pay_confirm(pay_id) {
+        $("#dialog-confirm").attr("pay_id",pay_id);
+        $("#dialog-confirm").dialog({
+            resizable: false,
+            width: 330,
+            modal: true,
+            /*buttons: {
+
+             "Отменить": function () {
+             $(this).dialog("close");
+             }, "Подтвердить": function () {
+             var msg = $('#filters_form').serialize();
+             $.ajax({
+             type: 'POST',
+             url: '{MAIN_URL}admin/pay_confirm/',
+             data: {
+             detect: "PAY_CONFIRM_OK",
+             pay_id: pay_id,
+             msg
+             },
+             success: function (msg) {
+             //msg = $.parseJSON(msg);
+             $("#pays_table > tbody tr").each(function () {
+             this.remove();
+             });
+             $("#pays_table > tbody").append(msg);
+
+             },
+             error: function (xhr, str) {
+             alert('Возникла ошибка: ' + xhr.responseCode);
+             }
+             });
+             $(this).dialog("close");
+             }
+             }*/
+        });
+
+    }
+    /*
+     var paysStore = Ext.create('Ext.data.Store', {
+     model: 'pays',
+     storeId:'paysStore',
+     pageSize: 20,
+     proxy: {
+     type: 'ajax',
+     url: '{MAIN_URL}admin/pay_confirm?detect=get_pays_grid',
+     reader: {
+     type: 'json',
+     root: 'data'
+     }
+     },
+     autoLoad: true,
+     autoSync: true
+     });
+
+
+     var paysGrid = Ext.create('Ext.grid.Panel', {
+     title: 'Платежи',
+     store: paysStore,
+     height:640,
+     width: "80%",
+     columns: [
+     {xtype: 'rownumberer'},
+     {header: '№ сделки', width: 80, sortable: false, dataIndex: 'deal_id'},
+     {header: 'Дата платежа', width: 115, sortable: false, dataIndex: 'pay_date'},
+     {header: 'Плательщик', width: 115, sortable: false, dataIndex: 'customer'},
+     {header: 'Услуга', width: 270, sortable: false, dataIndex: 'service_name'},
+     {header: 'Сумма $', width: 90, sortable: false, dataIndex: 'summa_usd', format: '$0,0',},
+     {header: 'Сумма руб.', width: 90, sortable: false, dataIndex: 'summa_rub'},
+     {header: 'Подтверждено', width: 125, sortable: false, dataIndex: 'confirm'},
+     {
+     xtype  : 'actioncolumn',
+     width  : 30,
+     items  : [
+     {
+     icon   : '{IMG_URL}'+'lock.gif',  // Use a URL in the icon config
+     tooltip: 'Подтвердить',
+     handler: function(grid, rowIndex, colIndex) {
+     Ext.MessageBox.confirm('Подтверждение платежа', 'Вы подтверждаете этот платеж?', function(btn, text){
+     if (btn == 'yes'){
+     var rec = paysStore.getAt(rowIndex).data;
+     confirm_pay(rec.pay_id);
+     }
+     });
+
+     }
+     }]
+     }
+
+     ],
+     dockedItems: [{
+     xtype: 'pagingtoolbar',
+     store: paysStore,   // same store GridPanel is using
+     dock: 'bottom',
+     displayInfo: true
+     }],
+     renderTo: paysDiv
+     });
+
+
+     function loadPaysStore(){
+     Ext.Ajax.request({
+     url: '{MAIN_URL}admin/pay_confirm/',
+     params:{
+     detect:"get_pays_grid"
+
+     },
+     success: function(response){
+     var json = Ext.JSON.decode(response.responseText);
+     var myData=json.data;
+     if (myData != null){
+     paysStore.loadData(myData)
+     }
+     else {
+     paysStore.removeAll();
+     paysStore.load;
+     paysGrid.paysStore.sync();
+     };
+
+     }
+     })
+
+     }
+     /*paysStore.load({
+     params: {
+     // specify params for the first page load if using paging
+     start: 0,
+     limit: 5,
+     // other params
+     foo:   'bar'
+     }
+     });	*/
+    //loadPaysStore();
+    /*
+     function confirm_pay(pay_id){
+     Ext.Ajax.request({
+     url: '{MAIN_URL}admin/pay_confirm/',
+     params:{
+     detect:"pay_confirm",
+     pay_id: pay_id
+     },
+     success: function(response){
+
+     paysGrid.getStore().reload({
+     callback: function(){
+     paysGrid.getView().refresh();
+     }
+     });
+     //paysStore.reload;
+     //paysGrid.reconfigure(paysStore);
+     //loadPaysStore();
+
+     }
+     })
+     }
+
+     });*/
+
+
+</script>
+
+
+{main_bottom}
+{foot}

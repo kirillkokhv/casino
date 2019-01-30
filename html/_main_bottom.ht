@@ -1,0 +1,4 @@
+<div id="main_bottom">
+
+    &copy; <span id="about_tur+">2014-{YEARS} , Программный комплекс «Тур+»</span>{LOAD_TIME}
+</div>

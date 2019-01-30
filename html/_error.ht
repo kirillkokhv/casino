@@ -1,0 +1,22 @@
+<!-- BEGIN error_global -->
+{ALERT}
+<table align="center" border="0" cellspacing="1" bgcolor="#ff5555">
+  <tr>
+    <td style="height:20"><b style="color:#ffffff">&nbsp;&nbsp;Ошибка на странице</b></td>
+  </tr>
+  <tr>
+    <td bgcolor="#ffffff">
+        <table cellspacing="2">
+        <tr><td class="sz1" style="color:#ff0000">
+          <ul style="list-style-type: none; style="margin-left:15">
+            <!-- BEGIN error_global_list -->
+            <li>{ERROR_GLOBAL}</li>
+            <!-- END error_global_list -->
+            </ul>
+        </td></tr>
+        </table>
+    </td>
+  </tr>
+</table>
+<br>
+<!-- END error_global -->

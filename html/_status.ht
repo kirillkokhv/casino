@@ -1,0 +1,22 @@
+<!-- BEGIN status_global -->
+<table align="center" border="0" cellspacing="1" cellpadding="1" bgcolor="#00ae00">
+  <tr>
+    <td style="height:20"><b style="color:#ffffff">&nbsp;&nbsp;Успешная операция</b></td>
+  </tr>
+  <tr>
+    <td bgcolor="#ffffff">
+        <table border="0" cellspacing="2" cellpadding="2">
+        <tr><td class="sz1" style="color:green">
+          <ul style="list-style-type: none; margin-left:15">
+            <!-- BEGIN status_global_list -->
+            <li>{STATUS_GLOBAL}</li>
+            <!-- END status_global_list -->
+            </ul>
+        </td></tr>
+        </table>
+    </td>
+  </tr>
+</table>
+<br>
+<hr size="0" color="green" width="98%">
+<!-- END status_global -->

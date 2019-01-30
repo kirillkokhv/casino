@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>marinahkt21</title>
+  <meta name="fragment" content="!" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf8" />
+  <link rel="stylesheet" type="text/css" href="/flu/css/bootstrap.css" />
+  <script type='text/javascript' src='/flu/assets/jquery-1b805b88be8416feda234846739302cce65bc243.js'></script>
+  <script type='text/javascript' src='/flu/assets/webrtc_adapter-e9470dbe7d060182534a6b6e05fe761fa10770ea.js'></script>
+  <script type='text/javascript' src='/flu/assets/play-0da4e8f8b9667b961fd5da3e93ad145c314929bb.js'></script>
+<![if gte IE 10]>
+  <script type='text/javascript' src='/flu/assets/dash-24acf7220f843000ee4c92162a731172e3be4a25.js'></script>
+<![endif]>
+</head>
+<body>
+
+<!--
+Query string options:
+
+dvr=false / dvr=true for enabling or disabling DVR playback
+
+autoplay=false  to disable autostarting playback
+-->
+
+
+<style>
+html {
+  height: 100%;
+  overflow: hidden; /* Hides scrollbar in IE */
+}
+ 
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+ 
+#player {
+  height: 100%;
+  position: relative;
+}
+
+/* http://stackoverflow.com/questions/14250583/safari-on-ipad-ios6-does-not-scale-html5-video-to-fill-100-of-page-width */ 
+video, canvas {
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+video {
+  height: 100%;
+  position: absolute;
+}
+
+#debug-container {color: black; background-color: rgba(255,255,255,0.7); position: absolute; top: 0; width: 100% }
+#debug-container p { margin: 0; padding-left: 3px; }
+#debug-container p:before { content: "log | ";}
+
+.playButton {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 3em;
+    width: 3em;
+    height: 1.5em;
+    margin: -0.75em 0 0 -1.5em;
+    background-color: rgba(43, 51, 63, 0.7);
+    border: 0.06666em solid #ffffff;
+    border-radius: 0.3em;
+    -webkit-border-radius: 0.3em;
+    -moz-border-radius: 0.3em;
+    cursor: pointer;
+    color: #ffffff;
+    text-align: center;
+    font-family: "Helvetica Neue";
+}
+
+.playButton:after {
+  content: '\25BA';
+}
+
+.playButton:hover {
+    background-color: rgba(43, 51, 63, 1);
+}
+
+.poster{
+    display: inline-block;
+    vertical-align: middle;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-size: contain;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+}
+
+</style>
+
+<div id="player">&nbsp;</div>
+<div id="debug-container">
+</div>
+
+
+
+<script>
+var is_debug = false;
+function debug(event){
+  if (!is_debug) return;
+  var container = document.getElementById("debug-container");
+  var add_line = function(msg){
+    var child = document.createElement("p");
+    child.innerHTML = msg;
+    container.appendChild(child);
+  }
+  if (typeof(event) == "string"){
+    add_line(event);
+    return;
+  }
+  var message = "";
+  switch(event.event){
+    case "proto_selected":
+      message = "protocol: " + event.protocol;
+      if (event.forced) message +=  "; forced";
+      if (event.method) message +=  "; method: " + event.method;
+      add_line(message);
+      break;
+    default:
+      if (JSON && JSON.stringify)
+        add_line(JSON.stringify(event));
+  }
+}
+
+var stream_preview_url = function () {
+  if (true) {
+    return window.location.protocol + "//" + window.location.host + "/marinahkt21/preview.jpg";
+  } else {
+    return undefined;
+  }
+}
+
+function videoTag(src) {
+  var srcSegment = src ? ('src="' + src + '"') : "";
+  var posterSegment = stream_preview_url() ? ('poster="' + stream_preview_url() + '"') : "";
+  return "<video id=\"fluvideotag\" " +  srcSegment + " style='width: 100%; height: 100%' controls " + (true ? 'autoplay ' : '') + posterSegment  +" />";
+}
+
+function getStreamName(){
+  if (!this.streamName){
+    var regex = /^\/(.*)\/embed.html$/;
+    this.streamName = regex.exec(window.location.pathname)[1];
+  }
+  return this.streamName;
+}
+
+/* http://stackoverflow.com/questions/470832/getting-an-absolute-url-from-a-relative-one-ie6-issue */
+function escapeHTML(s) {
+    return s.split('&').join('&amp;').split('<').join('&lt;').split('"').join('&quot;');
+}
+
+function qualifyURL(url) {
+    var el= document.createElement('div');
+    el.innerHTML= '<a href="'+escapeHTML(url)+'">x</a>';
+    return el.firstChild.href;
+}
+
+function urlWithToken(url, token) {
+  return url + token;
+}
+
+function urlParams() {
+  var params = {};
+  var match = null;
+
+  if (match = /from=(\d+)/.exec(window.location.search)) {
+    params.from = parseInt(match[1]);
+  }
+
+  if (match = /to=(\d+)/.exec(window.location.search)) {
+    params.to = parseInt(match[1]);
+  }
+
+  if (match = /duration=(\d+)/.exec(window.location.search)) {
+    params.duration = parseInt(match[1]);
+  }
+
+  if (params.from && params.to) {
+    params.duration = params.to - params.from;
+    if (params.duration < 0) { // just ignore negative duration
+      delete params.duration;
+    }
+  }
+
+  return params;
+}
+
+function pathHLS() { // http://localhost:8080/rtsp10/timeshift_abs-.m3u8
+  var params = urlParams();
+  if (params.from && params.duration) {
+    return "/index-" + params.from + "-" + params.duration + ".m3u8";
+  } else if (params.from) {
+    return "/timeshift_abs-" + params.from + ".m3u8";
+  }
+
+  return "/index.m3u8";
+}
+
+function pathHDS() {
+  var params = urlParams();
+  if (params.from && params.duration) {
+    return "/archive/" + params.from + "/" + params.duration + "/manifest.f4m";
+  } else if (params.from) {
+    return "/archive/" + params.from + "/now/manifest.f4m";
+  }
+
+  return "/manifest.f4m";
+}
+
+/* http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript */
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+
+function startQosUpdating() {
+  // var now = new Date();
+  // var now_ms = now.getTime();
+  // var utc = Math.floor( now.getTime() / 1000);
+  // 
+  // if(!window.qos_update_timer) {
+  //   var delay = (Math.floor(utc / 10) + 1)*10000 - now_ms + 10;
+  //   window.qos_update_timer = setTimeout(realQosUpdate, delay);
+  // }
+}
+
+
+function realQosUpdate() {
+  // $.post(urlWithToken(url + "/qos.json"+ token, ""), {bufferings : window.bufferings_in_previous_period}).
+  // always(function() {
+  //   window.bufferings_in_previous_period = 0;
+  //   window.qos_update_timer = undefined;
+  //   startQosUpdating();
+  // });
+}
+
+
+
+
+function bufferingHappened() {
+  var now = new Date();
+  var now_ms = now.getTime();
+  var utc = Math.floor( now.getTime() / 1000);
+
+  if(!window.last_flush_buffer_time) {
+    window.last_flush_buffer_time = utc/10;
+    window.bufferings_in_previous_period = 0;
+  }
+
+  window.bufferings_in_previous_period += 1;
+}
+
+
+//How to use OSMF StrobeMediaPlayback events
+//http://stackoverflow.com/questions/14731315/strobe-media-playback-osmf-events
+//http://www.realeyes.com/blog/2012/10/16/using-the-strobe-media-playback-javascript-api/
+function use_default_osmf_bridge(element) {
+  window.osmf_play_duration_activated = false;
+  window.osmf_element_name = element;
+  window.default_osmf_bridge_created = function(playerId, eventName, props) {
+    if(eventName == 'onJavaScriptBridgeCreated') {
+      startQosUpdating();
+    }
+    // eventName == 'emptied'
+    // eventName == 'progress'
+    // eventName == 'play'
+
+    if(eventName == 'buffering') {
+      if (healthTimeout == undefined) {
+        healthTimeout = setTimeout(stopIfTimeouted, 3000);
+      }
+    }
+
+    if(eventName == 'waiting') {
+      bufferingHappened();
+    }
+
+    if(eventName == 'pause') {
+      notify({event : 'playback_pause'});
+    }
+
+    if(eventName == 'play') {
+      notify({event : 'playback_play'});
+    }
+
+    // for rtmp, hls 'timeupdate', for hds 'timeChange'
+    if (eventName === 'timeupdate' || eventName ==='timeChange') {
+      if (!window.osmf_play_duration_activated) {            
+        if (play_duration) {
+          var endtime = play_duration; 
+          var currentTime = props.currentTime;
+          if (currentTime >= endtime) {
+            window.osmf_play_duration_activated = true;
+            var player = document.getElementById(playerId);
+            player.pause();
+            console.log('paused by play_duration');
+          }     
+        }
+      }      
+    }
+  };
+};
+
+function osmf_hds_player(element) {
+    debug("player: osmf_hds_player");
+    var srcurl = urlWithToken(url+pathHDS(), token);
+
+    var _player = document.getElementById(element);
+    var _autoplay = true;
+    var _poster = stream_preview_url();
+
+    var embedGrindPlayer = function(autoplay) {
+      var width = "100%";
+      var height = "100%";
+
+      use_default_osmf_bridge(element);
+
+      var flashvars = {
+        src : srcurl,
+        autoPlay: autoplay,
+        javascriptCallbackFunction: 'default_osmf_bridge_created'
+      };
+      document.getElementById(element).innerHTML = "<div style='width: 100%; height: 100%;' id='"+element+"-flash'></div>";
+      var paramObj = {
+        allowScriptAccess: "always",
+        allowFullScreen: "true",
+        allowNetworking : "all",
+        wmode: "opaque"
+      };
+      swfobject.embedSWF("/flu/GrindPlayer.swf", element+"-flash", width, height, "10.3", "/flu/expressInstall.swf", flashvars, paramObj, {name: "StrobeMediaPlayback"});
+    }
+
+    if (!_autoplay && _poster) {
+      // Grind player doesn't have a poster property as other players do.
+      // So we render big play button and background picture with video preview as a poster.
+
+      var backgroundPicture = document.createElement("div");
+      backgroundPicture.style.backgroundImage = "url(" + _poster + ")";
+      backgroundPicture.className = "poster";
+      player.appendChild(backgroundPicture);
+
+      var playButton = document.createElement("div");
+      playButton.className = "playButton";
+      playButton.onclick = function() {
+        // Ignore original autoplay setting and force Grind Player
+        // to start playing immediately after it is ready.
+        embedGrindPlayer(true);
+      };
+      player.appendChild(playButton);
+    } else {
+      // There is no need to remove play button and background picture explicitly
+      // because embedGrindPlayer is going to clear the target element for us.
+      embedGrindPlayer(_autoplay);
+    }
+
+}
+
+
+function osmf_hls_player(element) {
+    debug("player: osmf_hls_player");
+    var srcurl = urlWithToken(url+pathHLS(), token);
+    var hls_plugin_url = qualifyURL("/flu/HLSDynamicPlugin.swf");
+
+    var width = "100%";
+    var height = "100%";
+
+    use_default_osmf_bridge(element);
+
+    var flashvars = {
+      src : srcurl,
+      autoPlay: true,
+      plugin_hls : hls_plugin_url,
+      poster: stream_preview_url(),
+      javascriptCallbackFunction: 'default_osmf_bridge_created'
+    };
+
+    document.getElementById(element).innerHTML = "<div style='width: 100%; height: 100%;' id='"+element+"-flash'></div>";
+    var paramObj = {allowScriptAccess : "always", allowFullScreen : "true", allowNetworking : "all", wmode: "opaque"};
+    swfobject.embedSWF("/flu/StrobeMediaPlayback.swf", element+"-flash", width, height, "10.3", "/flu/expressInstall.swf",
+      flashvars, paramObj, {name: "StrobeMediaPlayback"});        
+}
+
+function video_tag_hls_player(element, url) {
+  debug("player: video_tag_hls_player");
+  var srcurl = urlWithToken(url+pathHLS(), token);
+
+  // Debug for non-mobile browser
+  // var srcurl = "http://portal:8080/vod/bunny.mp4";
+
+  document.getElementById(element).innerHTML = videoTag(srcurl);
+
+  if (play_duration) {
+    //How to use HTML5 video tag events
+    //http://stackoverflow.com/questions/8140539/javascript-event-listener-to-start-video-at-certain-time-and-stop-video-after-ce
+    //http://www.w3.org/TR/html5/embedded-content-0.html#event-media-ended
+
+    var endtime = play_duration;    // stop at 4 seconds
+
+    var video = document.getElementById('fluvideotag');
+
+    var timeUpdateListener = function() {      
+       if (this.currentTime >= endtime) {
+            this.pause();
+            this.removeEventListener("timeupdate",timeUpdateListener);
+        }
+    }
+
+    //handler should be bound first
+    video.addEventListener("timeupdate", timeUpdateListener, false);
+    video.addEventListener("play", function(){ notify({ event: 'playback_play' }) }, false);
+    video.addEventListener("pause", function(){ notify({ event: 'playback_pause' }) }, false);
+
+    //suppose that video src has been already set properly
+    video.load();
+  }
+}
+
+function webrtc_player(element, url) {
+  debug("player: webrtc_player");
+
+  document.getElementById(element).innerHTML = videoTag();
+  var remoteVideo = document.getElementById('fluvideotag');
+
+  var PeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+  var IceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate;
+  var SessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription;
+  if (! navigator.getUserMedia) { navigator.getUserMedia = navigator.mozGetUserMedia || navigator.webkitGetUserMedia; };
+
+  var remotePc; // PeerConnection
+
+  var ws_protocol = window.location.protocol === 'https:' ? "wss:" : "ws:";
+  var ws_socket;
+
+  var onWsMsg = function(evt) {
+    var message = JSON.parse(evt.data);
+
+    if (message.type === 'offer') {
+      var desc = new SessionDescription(message);
+      remotePc.setRemoteDescription(desc)
+      .then(function() {
+        debug("success adding offer");
+        return remotePc.createAnswer();
+      })
+      .then(function (answer) {
+        return remotePc.setLocalDescription(answer);
+      })
+      .then(function () {
+        sendMessage(remotePc.localDescription);
+      })
+      .catch(function(reason) {
+        debug("failed to set remote answer",reason);
+      });
+    } 
+    else if (message.type === 'candidate') {
+      var candidate = new IceCandidate(message.candidate);
+      remotePc.addIceCandidate(candidate, function() {
+      }, function(err) {
+        debug("failed to add ICE from remote:",err);
+      });
+    }
+  }
+
+  function sendMessage(msg) {
+    ws_socket.send(JSON.stringify(msg));
+  }
+
+  function requestStream() {
+    remotePc = new PeerConnection(null);
+    remotePc.stream_id = "remote1";
+    remotePc.onicecandidate = gotIceCandidate;
+    remotePc.ontrack = gotRemoteTrack;
+
+    // Logging
+    remotePc.oniceconnectionstatechange = function(){debug({"ICE connection state": remotePc.iceConnectionState});};
+  }
+
+  function gotIceCandidate(event){
+    if (event.candidate) {
+
+      sendMessage({
+        type: 'candidate',
+        stream_id : "local1",
+        label: event.candidate.sdpMLineIndex,
+        id: event.candidate.sdpMid,
+        candidate: event.candidate
+      });
+    }
+  }
+
+  function gotRemoteTrack(e){
+    if (e.track.kind === "video") {
+      debug({"video track": e.streams[0]});
+      remoteVideo.srcObject = e.streams[0];
+    }
+  }
+
+  function openConnection() {
+    var ws_url = urlWithToken(ws_protocol +"//"+window.location.host+"/" + getStreamName() + "/webrtc", token);
+    ws_socket = new WebSocket(ws_url);
+    ws_socket.onopen = function(evt) {
+      requestStream();
+    }
+
+    ws_socket.onmessage = onWsMsg;
+  }
+
+
+  //handler should be bound first
+  remoteVideo.addEventListener("play", function(){ notify({ event: 'playback_play' }) }, false);
+  remoteVideo.addEventListener("pause", function(){ notify({ event: 'playback_pause' }) }, false);
+
+  remoteVideo.addEventListener('loadedmetadata', function() {
+    debug({'videoWidth': this.videoWidth, 'videoHeight': this.videoHeight});
+  });
+
+  openConnection();
+  //suppose that video src has been already set properly
+  remoteVideo.load();
+}
+
+
+// Mozilla/5.0 (Linux; Android 4.4; Nexus 7 Build/KRT16M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.92 Safari/537.36
+function is_android(ua){
+  return ua.indexOf("safari") != -1 && ua.indexOf("chrome") != -1 && ua.indexOf("android") != -1 && ua.indexOf("mobile") != -1;
+}
+
+// Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36
+function is_chrome_desktop(ua){
+  return ua.indexOf("safari") != -1 && ua.indexOf("chrome") != -1 && ua.indexOf("android") == -1 && ua.indexOf("mobile") == -1;
+}
+
+// Mozilla/5.0 (Linux; Android 4.4; Nexus 7 Build/KRT16M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.92 Safari/537.36
+function is_chrome_mobile(ua){
+  return ua.indexOf("safari") != -1 && ua.indexOf("chrome") != -1 && ua.indexOf("android") != -1 && ua.indexOf("mobile") == -1;
+}
+
+function is_safari(ua){
+  return ua.indexOf("safari") != -1 && ua.indexOf("chrome") == -1;
+}
+
+function is_firefox(ua) {
+  return ua.indexOf("firefox") != -1;
+}
+
+
+function is_linux_arm(){
+  return navigator.platform && navigator.platform.toLowerCase().indexOf("linux arm") != -1;
+}
+
+
+function auto_hls_player(element, url, ua) {
+  if(is_safari(ua) || is_android(ua) || is_chrome_mobile(ua)) {
+    video_tag_hls_player("player", url);
+    notify({event : 'proto_selected', protocol : 'hls', method : 'video'});
+  } else {
+    if(is_linux_arm() && available_protocols.hls) {
+      video_tag_hls_player("player", url);
+      notify({event : 'proto_selected', protocol : 'hls', method : 'video'});
+    } else {
+      osmf_hls_player("player", url);
+      notify({event : 'proto_selected', protocol : 'hls', method : 'flash'});
+    }
+  }
+}
+
+
+function flashAvailable() {
+  console.log("query for flash available");
+  var version = swfobject.getFlashPlayerVersion();
+  var unavailable = (version.major == 0) && (version.minor == 0) && (version.release == 0);
+  return !unavailable;
+};
+
+
+
+function auto_hls_hds_player(element, url, ua, available_protocols) {
+  if((is_safari(ua) || is_android(ua) || is_chrome_mobile(ua)) && available_protocols.hls) {
+    video_tag_hls_player("player", url);
+    notify({event : 'proto_selected', protocol : 'hls', method : 'video'});
+  } else {
+    if(is_linux_arm() && available_protocols.hls) {
+      video_tag_hls_player("player", url);
+      notify({event : 'proto_selected', protocol : 'hls', method : 'video'});
+    } else if (flashAvailable() && available_protocols.hds) {
+      osmf_hds_player("player", url);
+      notify({event : 'proto_selected', protocol : 'hds'});
+    } else if (flashAvailable()) {
+      osmf_hls_player("player", url);
+      notify({event : 'proto_selected', protocol : 'hls', method : 'flash'});      
+    } else if (is_firefox(ua) && available_protocols.dash) {
+      dash_player("player", url);
+      notify({event : 'proto_selected', protocol : 'dash', method : 'video'});
+    } else {
+      video_tag_hls_player("player", url);
+      notify({event : 'proto_selected', protocol : 'hls', method : 'video'});
+    }
+  }
+}
+
+
+function dash_player_prefix() {
+  var params = urlParams();
+  console.log(params);
+
+  if (params.from && params.duration) {
+    return "/Manifest-" + params.from + "-" + params.duration + ".mpd";
+  } else {
+    return "/Manifest.mpd";
+  }  
+}
+
+function dash_player(element, url) {
+  debug("player: dash_player");
+
+  var srcurl = urlWithToken(url+dash_player_prefix(), token);
+
+  // Debug for non-mobile browser
+  // var srcurl = "http://portal:8080/vod/bunny.mp4";
+  document.getElementById(element).innerHTML = videoTag(srcurl);
+
+  var player = dashjs.MediaPlayer().create();
+  player.initialize(document.getElementById("fluvideotag"), srcurl, true);
+
+  // if (play_duration) {
+  //   //How to use HTML5 video tag events
+  //   //http://stackoverflow.com/questions/8140539/javascript-event-listener-to-start-video-at-certain-time-and-stop-video-after-ce
+  //   //http://www.w3.org/TR/html5/embedded-content-0.html#event-media-ended
+
+  //   var endtime = play_duration;    // stop at 4 seconds
+
+  //   var video = document.getElementById('fluvideotag');
+
+  //   var timeUpdateListener = function() {      
+  //      if (this.currentTime >= endtime) {
+  //           this.pause();
+  //           this.removeEventListener("timeupdate",timeUpdateListener);
+  //       }
+  //   }
+
+  //   //handler should be bound first
+  //   video.addEventListener("timeupdate", timeUpdateListener, false);
+
+  //   //suppose that video src has been already set properly
+  //   video.load();
+  // }
+}
+
+
+function rtmp_player(element, proto, filename) {
+  osmf_rtmp_player(element, proto, filename); 
+  //jw_rtmp_player(element, filename); 
+}
+
+function osmf_rtmp_player(element, proto, filename) {
+    var rtmp_port0 = parseInt('1935');
+    var rtmps_port0 = parseInt('');
+    var rtmp_port = rtmp_port0;
+    if(proto == 'rtmps') {
+      rtmp_port = rtmps_port0;
+    }
+    var rtmp_host = window.location.hostname + ":" + rtmp_port;
+    var rtmp_app = "static";
+    var rtmp_app_url = proto + "://" + rtmp_host + "/" + rtmp_app;
+    var rtmp_url = rtmp_app_url + '/' + filename;
+
+    debug("player: osmf_rtmp_player: "+rtmp_url);
+    var srcfile = urlWithToken(rtmp_url, token);
+
+    var width = "100%";
+    var height = "100%";
+
+    use_default_osmf_bridge(element);
+
+    var flashvars = {
+      src : srcfile,
+      autoPlay: true,
+      poster: stream_preview_url(),
+      javascriptCallbackFunction: 'default_osmf_bridge_created'
+    };
+    document.getElementById(element).innerHTML = "<div style='width: 100%; height: 100%;' id='"+element+"-flash'></div>";
+    var paramObj = {allowScriptAccess : "always", allowFullScreen : "true", allowNetworking : "all", wmode: "opaque"};
+    swfobject.embedSWF("/flu/StrobeMediaPlayback.swf", element+"-flash", width, height, "10.3", "/flu/expressInstall.swf",
+      flashvars, paramObj, {name: "StrobeMediaPlayback"});
+}
+
+is_debug = getParameterByName("debug") === 'true';
+var url = qualifyURL("/marinahkt21");
+var available_protocols = {"hds":true,"rtmp":true,"hls":true,"dash":true,"webrtc":true,"rtmps":true};
+var token0 = getParameterByName("token");
+window.token = token0 ? "?token="+token0 : "";
+
+var proto = getParameterByName("proto");
+
+var play_duration_str = getParameterByName("play_duration");
+if (play_duration_str) {
+  var play_duration_int = parseInt(play_duration_str);
+  if (!isNaN(play_duration_int)) {
+    var play_duration = play_duration_int;
+  }
+}
+
+debug("stream: marinahkt21");
+debug("url: " + url);
+debug('available protocols: {"hds":true,"rtmp":true,"hls":true,"dash":true,"webrtc":true,"rtmps":true}');
+debug("user agent: " + window.navigator.userAgent);
+
+
+function notify(event) {
+  event.name = getStreamName();
+  debug(event);
+  window.top.postMessage(event, '*');
+}
+
+
+function forceProtocol(proto, available_protocols) {
+  if (proto==="rtmp" && available_protocols.rtmp) {
+    rtmp_player("player", 'rtmp', 'marinahkt21');
+    notify({event : 'proto_selected', protocol : 'rtmp', forced : true});
+  }
+  if (proto==="rtmps" && available_protocols.rtmps) {
+    rtmp_player("player", 'rtmps', 'marinahkt21');
+    notify({event : 'proto_selected', protocol : 'rtmps', forced : true});
+  }
+  if (proto==="hds" && available_protocols.hds) {
+    osmf_hds_player("player", url);
+    notify({event : 'proto_selected', protocol : 'hds', forced : true});
+  } 
+  if (proto==="dash" && available_protocols.dash) {
+    dash_player("player", url);
+    notify({event : 'proto_selected', protocol : 'dash', forced : true});
+  } 
+  if (proto==="webrtc" && available_protocols.webrtc) {
+    webrtc_player("player", url);
+    notify({event : 'proto_selected', protocol : 'webrtc', forced : true});
+  } 
+  if (proto==="hls" && available_protocols.hls) {
+    var ua = window.navigator.userAgent.toLowerCase();
+    auto_hls_player("player", url, ua);
+  }
+  if (proto==="hls_video" && available_protocols.hls) {  
+    video_tag_hls_player("player", url);
+    notify({event : 'proto_selected', protocol : 'hls', method : 'video', forced : true});
+  }
+  if (proto==="hls_flash" && available_protocols.hls) {
+    osmf_hls_player("player", url);
+    notify({event : 'proto_selected', protocol : 'hls', method : 'flash', forced : true});
+  }  
+}
+
+
+
+function realtime_player(element, url, ua, available_protocols) {
+  if (flashAvailable() && available_protocols.rtmps) {
+    rtmp_player("player", 'rtmps', 'marinahkt21');
+    notify({event: 'proto_selected', protocol: 'rtmps', method: 'flash'});
+  } else if (flashAvailable() && available_protocols.rtmp) {
+    rtmp_player("player", 'rtmp', 'marinahkt21');
+    notify({event: 'proto_selected', protocol: 'rtmp', method: 'flash'});
+  }
+  // else if (window.RTCPeerConnection && available_protocols.webrtc) {
+  //   webrtc_player("player", url);
+  //   notify({event: 'proto_selected', protocol: 'webrtc', method: 'video'});
+  // }
+
+  // we ran out of realtime protocols, just play any suitable:
+  return autoProtocol(available_protocols);
+}
+
+function autoProtocol(available_protocols) {
+  var ua = window.navigator.userAgent.toLowerCase();
+  auto_hls_hds_player("player", url, ua, available_protocols);
+}
+
+function realtimeProtocol(available_protocols) {
+  var ua = window.navigator.userAgent.toLowerCase();
+  realtime_player("player", url, ua, available_protocols);
+}
+
+function displayPlayer() {
+  if (proto) {
+    if (proto == 'realtime') {
+      realtimeProtocol(available_protocols);
+    } else {
+      forceProtocol(proto, available_protocols);
+    }
+  } else {
+    autoProtocol(available_protocols);
+  }
+}
+
+
+// This is just state machine with two functions-states
+
+var healthTimeout = undefined;
+function startIfReady() {
+  clearTimeout(healthTimeout); // in case if we accidentially started two timeouts
+  healthTimeout = undefined;
+  $.get("/marinahkt21/status.json"+token).always(function (data, tstatus, resp) {
+    switch (data['availability']) {
+    case 'not_started':
+    case 'backup':
+    case 'available':
+      displayPlayer();
+      healthTimeout = setTimeout(stopIfDead, 3000);
+      break;
+
+    case undefined:
+    case 'unavailable':
+      document.getElementById("player").innerHTML = '<h1 class="page-header" style="color: #c12e2a">Video is not available</h1>';
+      healthTimeout = setTimeout(startIfReady, 3000);
+      break;
+    }
+  });
+}
+
+function stopIfDead() {
+  clearTimeout(healthTimeout); // in case if we accidentially started two timeouts
+  healthTimeout = undefined;
+  $.get("/marinahkt21/status.json"+token).always(function (data, tstatus, resp) {
+    switch (data['availability']) {
+    case 'not_started':
+    case 'backup':
+    case 'available':
+      healthTimeout = setTimeout(stopIfDead, 3000);
+      break;
+
+    case undefined: // if connection broken
+      if(data.status == 400) {
+        healthTimeout = setTimeout(stopIfDead, 3000);
+        break;
+      }
+    case 'unavailable':
+      document.getElementById('player').innerHtml = '<h1 class="page-header" style="color: #c12e2a">Video is not available</h1>';
+      healthTimeout = setTimeout(startIfReady, 3000);
+      break;
+    }
+  });
+}
+
+// stolen here: http://stackoverflow.com/a/15251023
+function isElementVisible(element)
+{
+    var elementPosition = element.offset().top;
+    var currentScroll = window.parent.$("iframe").contents().scrollTop();
+    var screenHeight = window.parent.$("iframe").height();
+    var visibleArea = currentScroll + screenHeight;
+    return (elementPosition < visibleArea);
+}
+
+$(window).scroll(function () {
+  window.playerVisible = !!isElementVisible($('#player'));
+  console.log("set visible: ", window.playerVisible)
+});
+
+
+if(getParameterByName("health") == "false") {
+  displayPlayer();
+} else {
+  healthTimeout = setTimeout(startIfReady, 0);  
+}
+
+
+
+if(window.addEventListener) window.addEventListener("message", function(evt) {
+  var msg = evt.data
+  if(msg.event == "select_protocol") {
+    if (msg.protocol == "auto") {
+      autoProtocol(available_protocols);
+    } if (msg.protocol == "realtime") {
+      realtimeProtocol(available_protocols);
+    } else {
+      forceProtocol(msg.protocol, available_protocols);
+    }
+  }
+}, false);
+
+</script>
+
+</body>
+</html>

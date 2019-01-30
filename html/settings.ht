@@ -1,0 +1,146 @@
+{head}
+{main_top}
+<!-- BEGIN settings -->
+<form method="post" action="{URI_URL}#list" name="frm">
+	<table>
+		<tbody>
+			<tr>
+				<td>
+					Наименование агенства: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{AGENCY_NAME}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Город: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{OFFICE_CITY}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Номер офиса: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{OFFICE_NUM}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					ИНН: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{INN}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					КПП: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{KPP}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					ОГРН: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{OGRN}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Фактический адрес: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{FACT_ADDRESS}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Юридический адрес: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{LAW_ADDRESS}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Телефон: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{PHONE}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Факс: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{FAX}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Электронная почта: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{EMAIL}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Сайт: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{WWW}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					ФИО директора: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{DIRECTOR_FIO}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					ФИО директора в родительском падеже: 
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{DIRECTOR_FIO_R}"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Банковские реквизиты
+				</td>
+				<td>
+					<input type="text" name="agency_name" class="settings" value="{BANK_DETAILS}"> 
+				</td>
+			</tr>
+        </tbody>
+              
+        </table>
+        <input type="hidden" name="detect" value="EDIT_OK">
+        <button>Сохранить</button>
+    </div>
+</form>
+
+
+
+<script type="text/javascript">
+ $("submit").button();
+    $("button").button();
+	
+</script>
+<!-- END settings -->
+
+
+{main_bottom}
+{foot}

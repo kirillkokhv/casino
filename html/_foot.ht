@@ -1,0 +1,81 @@
+</div>
+ <!-- BEGIN php_errors -->
+    <script type="text/javascript">
+        console.log('{ERROR_PHP}');
+
+    </script>
+    <!-- END php_errors -->
+   
+   
+<footer class="main-footer">
+    <div class="pull-right hidden-xs">
+      <b>{LOAD_TIME}</b>
+    </div>
+    <strong>2019</strong> All rights
+    reserved.
+  </footer>
+<style>
+#foot_animation {
+	position: relative;
+	padding: 0px;
+	margin: 0px;
+	height: 14px; /* высота блока */
+	overflow: hidden;
+	white-space:nowrap;
+	left:0px;
+	cursor: pointer;
+	font-size:8pt;
+}
+#foot_animate {
+	position: relative;
+	overflow: hidden;
+	margin:0px;
+	padding:0px;
+	/*color:red;*/
+}
+</style>
+
+<script>
+/*
+var oText = document.getElementById('foot_animate');
+var oContainer = document.getElementById('foot_animation');
+var nWidth = oText.offsetWidth;
+var nPos = oContainer.offsetWidth-600;
+var nPos = oContainer.innerText.length;
+var bScrolling = true;
+var foot_animate_html = '<div class="sz2" style="padding:5px;">'+oContainer.innerText.replace(/#/g, '<br><br>')+'</div>';
+
+function OnScrollerMouseOver() {
+	bScrolling = false;
+}
+
+function OnScrollerMouseOut() {
+	bScrolling = true;
+}
+
+function OnTimer() {
+	if(!bScrolling) return;
+	oText.style.left = nPos + 'px';
+	if(--nPos < -nWidth)
+		nPos = oContainer.offsetWidth;
+}
+OnTimer();
+
+oContainer.onmouseover = OnScrollerMouseOver;
+oContainer.onmouseout = OnScrollerMouseOut;
+window.setInterval(OnTimer, 40); //задержка перед каждым сдвигом
+
+Ext.get(oContainer).on('click', function(){
+	
+	new Ext.Window({
+		height : 500,
+		width  : 700,
+		layout : 'fit',
+		title  : 'Новость дня',
+		html   : foot_animate_html
+	}).show(true);
+});
+*/
+</script>
+</body>
+</html>

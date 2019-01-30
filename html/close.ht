@@ -1,0 +1,4 @@
+<script>
+window.opener = window;
+window.close();
+</script>

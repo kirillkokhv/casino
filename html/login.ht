@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>AdminLTE 2 | Log in</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+   <link rel="stylesheet" type="text/css" href="{CSS_URL}adminlte.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}ionicons.min.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}skins\skin-blue.min.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}adminlte.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}all.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+
+ <link rel="stylesheet" type="text/css" href="{CSS_URL}jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}ui.jqgrid.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}selectize.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}jquery.arcticmodal.css">
+
+
+    <link rel="stylesheet" href="{CSS_URL}eventCalendar.css">
+    <link rel="stylesheet" href="{CSS_URL}eventCalendar_theme_responsive.css">
+    <link rel="stylesheet" href="{CSS_URL}datepicker.min.css">
+    
+<!-- jQuery 3 -->
+<script type="text/javascript" src="{JS_URL}jquery.min.js"></script>
+
+<!-- jQuery UI 1.11.4 -->
+<script type="text/javascript" src="{JS_URL}jquery-ui.min.js"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+  $.widget.bridge('uibutton', $.ui.button);
+</script>
+<!-- Bootstrap 3.3.7 -->
+<script type="text/javascript" src="{JS_URL}bootstrap.min.js"></script>
+<!-- Morris.js charts -->
+<script type="text/javascript" src="{JS_URL}raphael.min.js"></script>
+<script type="text/javascript" src="{JS_URL}morris.min.js"></script>
+<!-- Sparkline -->
+<script type="text/javascript" src="{JS_URL}jquery.sparkline.min.js"></script>
+<!-- daterangepicker -->
+<script type="text/javascript" src="{JS_URL}moment.min.js"></script>
+<script type="text/javascript" src="{JS_URL}daterangepicker.js"></script>
+<!-- datepicker -->
+<script type="text/javascript" src="{JS_URL}bootstrap-datepicker.min.js"></script>
+<!-- AdminLTE App -->
+<script type="text/javascript" src="{JS_URL}adminlte.min.js"></script>
+<!-- iCheck -->
+<script src="{JS_URL}icheck.min.js"></script>
+
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+  <div class="login-logo">
+    <a href="../../index2.html"><b>Admin</b>LTE</a>
+  </div>
+  <!-- /.login-logo -->
+  <div class="login-box-body">
+    <p class="login-box-msg">Sign in to start your session</p>
+
+    <form method="POST" name="frm_login" onSubmit="return check(this);">
+      <div class="form-group has-feedback">
+        <input type="text" name="uname" class="form-control" placeholder="Login">
+        <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+      </div>
+      <div class="form-group has-feedback">
+        <input type="password" name="pass1"  class="form-control" placeholder="Password">
+        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+      </div>
+      <div class="row">
+        <div class="col-xs-8">
+          <div class="checkbox icheck">
+            <label>
+              <input type="checkbox">Remember Me
+            </label>
+          </div>
+        </div>
+        <!-- /.col -->
+        <div class="col-xs-4">
+          <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
+        </div>
+        <!-- /.col -->
+      </div>
+      <input type="hidden" name="challenge" value="{CHALLENGE}">
+      <input type="hidden" name="response" value="">
+      <input type="hidden" name="umode" value="log">
+    </form>
+
+    <div class="social-auth-links text-center">
+      <p>- OR -</p>
+      <a href="#" class="btn btn-block btn-social btn-facebook btn-flat"><i class="fa fa-facebook"></i> Sign in using
+        Facebook</a>
+      <a href="#" class="btn btn-block btn-social btn-google btn-flat"><i class="fa fa-google-plus"></i> Sign in using
+        Google+</a>
+    </div>
+    <!-- /.social-auth-links -->
+
+    <a href="#">Забыл пароль</a><br>
+    
+
+  </div>
+  <!-- /.login-box-body -->
+</div>
+<!-- /.login-box -->
+
+<!-- jQuery 3 -->
+
+
+<script>
+  $(function () {
+    $('input').iCheck({
+      checkboxClass: 'icheckbox_square-blue',
+      radioClass: 'iradio_square-blue',
+      increaseArea: '20%' /* optional */
+    });
+  });
+ 
+    function check(f) {
+
+        if (f.uname.value.length < 1) {
+            alert("Введите Логин");
+            f.uname.focus();
+            return false;
+        } else {
+            if (f.pass1.value.length < 1) {
+                alert("Введите Пароль");
+                f.pass1.focus();
+                return false;
+            } else {
+                f.response.value = (MD5(code_translit_kb(f.uname.value, 0), MD5(code_translit_kb(f.pass1.value, 0)), f.challenge.value));
+                f.pass1.value = "";
+                return true;
+            }
+        }
+    }
+
+</script>
+</body>
+</html>

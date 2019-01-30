@@ -1,0 +1,330 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>{TITLE}</title>
+    <meta name="robots" content="NOINDEX,NOFOLLOW">
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+    <link rel="icon" href="{MAIN_URL}favicon.ico" type="image/ico">
+    <link rel="shortcut icon" href="{MAIN_URL}favicon.ico" type="image/ico">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL_MAIN}">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}tur.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}ui.jqgrid.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}selectize.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL}jquery.arcticmodal.css">
+    <link rel="stylesheet" type="text/css" href="{CSS_URL_EXTJS}">
+    
+	
+    
+
+    <script type="text/javascript" src="{JS_URL_EXTJS}"></script>
+    <script type="text/javascript" src="{JS_URL_EXTJS_LOCALE}"></script>
+    <script type="text/javascript" src="{JS_URL_MAIN}"></script>
+    <script type="text/javascript" src="{JS_URL}dateformat.js"></script>
+    <script type="text/javascript" src="{JQ_URL_JQUERY}"></script>
+    <script type="text/javascript" src="{JQUERY_URL}jquery.maskedinput.js"></script>
+    <script type="text/javascript" src="{JQUERY_URL}jquery.tablesorter.js"></script>
+    <script type="text/javascript" src="{JQUERY_URL}selectize.js"></script>
+    <script type="text/javascript" src="{JQUERY_URL}jquery-ui.js"></script>
+    <script type="text/javascript" src="{JQUERY_URL}jquery.arcticmodal.js"></script>
+    
+  </head>
+  <body>
+  
+<style type="text/css">
+#loading-mask{font-family: Arial;position:absolute;left:0;top:0;width:100%;height:100%;z-index:20000;background-color:white;opacity:.5;}
+#loading{position:absolute;left:45%;top:40%;padding:2px;z-index:20001;height:auto;}
+#loading-msg {font: normal 12pt;}
+</style>
+<div id="loading-mask"></div>
+<div id="loading"><div class="loading-indicator"><span id="loading-msg">Загрузка...</span></div></div>
+<script>
+var TIME_HTML_HEAD = new Date().getTime();
+var STAT_LOADING = {STAT_LOADING};
+
+</script>
+<script type="text/javascript">
+var cookie = new Ext.state.CookieProvider();
+Ext.EventManager.on(window, 'load', function(){
+    Ext.QuickTips.init();
+	Ext.get('loading').hide(); Ext.get('loading-mask').hide();
+
+    <!-- BEGIN php_errors -->
+    new Ext.Window({
+        applyTo:"hello-win", width: 500, height: 300, autoScroll: true, closeAction:'hide',
+        html: '{ERROR_PHP}'
+    }).show();
+    <!-- END php_errors -->
+    
+    STAT_LOADING['time_html']=(new Date().getTime() - TIME_HTML_HEAD) / 1000;
+
+	/*Ext.Ajax.request({
+	    url: '{MAIN_URL}dialogs/stat_loading/',
+	    method: 'POST',
+	    params: STAT_LOADING
+	});*/
+
+});
+
+</script>
+<!-- BEGIN reset_time_sa -->
+<script type="text/javascript">
+set_cookie("time_sa",0,1);
+</script>
+<!-- END reset_time_sa -->
+<div id="hello-win" class="x-hidden"></div>
+<div id="top" style="width: 100%;" >
+        <div style="float:left; width: 300px; height: 100px;" >
+	    <div style="float: left; width: 300px; height: 40px; margin-left: 10px;" id="calendar" class="top_center"  ><br>
+		</div>	
+		<div style="float: left; width: 300px; height: 60px; margin-left: 10px;" id="tourist_count" class="top_center"  >
+		asdasd
+		</div>
+		<!--Вылетают: туристов - {DEPART_PEOPLE} (туров - {DEPART_TOUR})<br>
+        Возвращаются: туристов - {BACK_PEOPLE} (туров - {BACK_TOUR})<br>
+        Забронировано: туристов - {BOOK_PEOPLE} (туров - {BOOK_TOUR})<br>
+        </div>-->
+		
+		
+		</div>
+		<!-- BEGIN deal_info -->
+		<div style="float: left; width: 300px; height: 100px; margin-left: 310px; font-size:24">
+            <br />Сделка № {DEAL_ID} 
+			
+			
+        </div>
+		<!-- END deal_info -->
+        <div style="float: right; height: 100px;">
+            <br />{USER_FIO} <a href="{MAIN_URL}?umode=exit"><img src="{IMG_URL}exit.gif" alt="Выход"></a>
+			<br> {USER_OFFICE}
+			<br>  {DATE_TIME}, <b>{TIME}</b> (Хабаровск)
+			
+        </div>
+  
+
+
+
+</div>
+
+<!-- BEGIN left_menu -->
+<script type="text/javascript">
+
+Ext.apply(Ext.form.VTypes, {
+    daterange : function(val, field) {
+        var date = field.parseDate(val);
+
+        if(!date){
+            return;
+        }
+        if (field.startDateField && (!this.dateRangeMax || (date.getTime() != this.dateRangeMax.getTime()))) {
+            var start = Ext.getCmp(field.startDateField);
+            start.setMaxValue(date);
+            //start.validate();
+            //this.dateRangeMax = date;
+        }
+        else if (field.endDateField && (!this.dateRangeMin || (date.getTime() != this.dateRangeMin.getTime()))) {
+            var end = Ext.getCmp(field.endDateField);
+            end.setMinValue(date);
+            //end.validate();
+            //this.dateRangeMin = date;
+        }
+        
+
+        return true;
+    }
+});
+
+function menu_strong(obj, id)
+{
+	if(typeof(obj) === 'object') {
+		for(m in obj) {
+			if(obj[m]['id'] == {MENU_ID_CUR}) {
+				obj[m]['text'] = '<b>'+obj[m]['text']+'</b>';
+			} else if(typeof(obj[m]['children']) === 'object') {
+				menu_strong(obj[m]['children'], id);
+			}
+		}
+	}
+}
+Ext.EventManager.on(window, 'load', function(){
+	
+	  Ext.Ajax.request({
+            url: '{MAIN_URL}admin/info/',
+			params:{ 
+				detect:"get_info",
+				manager_id :{AUTH_ID}
+			},
+            success: function(response){
+				//alert(response.responseText);
+                var json = Ext.JSON.decode(response.responseText);
+		        var myData=json.data;
+		        if (myData != null){
+				    html = '';
+                    for	(i in myData){
+				        var now = new Date();
+                        date = new Date(myData[i].birthdate.replace(/(\d+)-(\d+)-(\d+)/, '$2/$3/$1'))
+                        age = now.getFullYear() - date.getFullYear();
+                        age = now.setFullYear(1972) < date.setFullYear(1972) ? age - 1 : age;	
+                        html += '<a href={MAIN_URL}clients/clientlist?detect=EDIT&id=' + myData[i].client_id + '>' + myData[i].fio + '</a>';
+                        html += '(' + myData[i].birthdate + ') <br>';
+                        
+                    }
+				    document.getElementById("fio").innerHTML = html;
+
+                    
+				}
+                else {
+				
+                  
+                };
+               
+            }
+    	})
+	
+	var today= new Date();
+	var dateField=new Ext.form.DateField({
+        boxMaxWidth: "300px",
+        width: "300px",
+        format: "d F Y",
+        renderTo: "calendar",
+        value: today,
+        listeners: { 
+            change: function(field, nv, ov){
+                get_client_count(nv.toLocaleString());
+            }
+        }
+        /*listener: {
+               change : {
+                          fn: function(field, data) {
+            				 alert('343');
+                             get_client_count(field.value)
+                             //alert(field.value);
+                            
+            				  
+                          }
+                       }
+        }*/
+    });
+    
+    get_client_count(today.toLocaleString());   
+	var viewport = Ext.create('Ext.container.Viewport', {
+    layout: 'border',
+    items: [{
+        region: 'north',
+        //html: '<h1 class="x-panel-header">Page Title</h1>',
+        border: false,
+		contentEl: 'top',
+		
+		
+        margins: '0 0 5 0'
+    }, {
+        region: 'west',
+        collapsible: true,
+		contentEl: 'menu', 
+		title: 'Меню',
+		split: true, 
+        width: 150
+		
+        // could use a TreePanel or AccordionLayout for navigational items
+    }, {
+        region: 'east',
+        title: 'Информация',
+        contentEl: 'right',
+        collapsible: true,
+		collapsed: true,
+        split: true,
+        margins: '5 5 5 5',
+		//hidden: true,
+        width: 150,
+        items:{
+            html: 'Ближайщие дни рождения: <br>'
+        }
+    }, {
+        region: 'center',
+		contentEl: 'center',
+		title: '{MAIN_TITLE}',
+		 autoScroll: true
+        //xtype: 'tabpanel', // TabPanel itself has no title
+        //activeTab: 0,      // First tab active by default
+        /*items: {
+            title: 'Default Tab',
+            html: 'The first tab\'s content. Others may be added dynamically'
+        }*/
+    }/*, {
+        region: 'south',
+        
+        collapsible: false,
+        contentEl: 'foot',
+        split: true,
+        height: 0,
+        minHeight: 0
+    }*/
+    ]
+});
+	
+	
+	/*new Ext.Viewport({
+		layout: 'border',
+		autoScroll: true,
+		items: [
+			{region: 'north', 
+             contentEl: 'top', 
+             height: 96, 
+             border : false, 
+             collapsible: true, 
+             title: 'Меню',
+             margins: '0 0 0 0',
+             split: true
+              },
+			{region: 'west', id: 'west-panel', title: 'Навигация',
+			 split: true, width: '{LEFT_MENU_WIDTH}', minSize: 215, maxSize: 400, collapsible: true, 
+			 collapsed: {MENU_COLLAPSED},
+             margins: '0 0 0 0', autoScroll: true,
+             layout: {type: 'accordion',animate: true},
+			 
+            },
+            {region: 'center', contentEl: 'center', title: '{MAIN_TITLE}', autoScroll: true},
+			{region: 'south', contentEl: 'foot',height: 30, border: false, hidden: {FOOT_HIDDEN}}
+        ]
+    });*/
+
+	
+});
+INC_PATH = '{MAIN_URL}';
+function get_client_count(date){
+    Ext.Ajax.request({
+        url: '{MAIN_URL}admin/info?detect=get_tours_count&date='+date,
+		
+        success: function (response) { 
+            
+			if(response.responseText!='undefined'){ 
+                var data = Ext.JSON.decode(response.responseText);
+                
+                document.getElementById('tourist_count').innerHTML='Вылетают: туристы - '+data.start_clients+'(туров - '+data.start_deals+')<br>'+
+                'Возвращаются: туристы - '+data.end_clients+'(туров - '+data.end_deals+')<br>'+
+                'Забронировано: туристы - '+data.end_clients+'(туров - '+data.end_deals+')<br>'; ; 
+                
+                
+			
+		  }
+		},
+		failure: function(){ alert('Неизвестная ошибка'); }
+	});    
+
+}
+
+
+</script>
+ <div id="menu" class="menulist">
+ <br>
+ {MENU_TREE}
+ <!-- <li><a href={MAIN_URL}clients/clientlist/>Клиенты </a>
+ <li><a href={MAIN_URL}orders/orderlist/>Сделки </a>
+ <li><a href={MAIN_URL}admin/mails/>Почта </a> 
+ <li><a href={MAIN_URL}admin/pay_confirm/>Подтверждение платежей </a>
+ <li><a href={MAIN_URL}admin/hotels/>Справочники</a> -->
+ </div> 
+<div id="right"><div id="fio"></div></div>
+<div id="tree_menu"></div>
+<!-- END left_menu -->
+<div id="center">

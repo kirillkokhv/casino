@@ -1,0 +1,196 @@
+{head}
+<!-- BEGIN login_form -->
+<!-- BEGIN manager_auth -->
+
+<!-- END manager_auth -->
+
+
+<div id="login_overflow">
+
+
+    <form method="POST" name="frm_login" onSubmit="return check(this);">
+        <script type="text/javascript">
+            var in_img = new Image();
+            in_img.src = "{IMG_URL}in.png";
+            in_img1 = new Image();
+            in_img1.src = "{IMG_URL}in1.png";
+        </script>
+        <fieldset style="padding:20px;">
+            <legend>ВХОД В СИСТЕМУ</legend>
+            <br>
+            <table width="180" align="center">
+                <tr>
+                    <td align="center" colspan="2" class="sz0" height="5"><font color="#ff0000">{ERROR}&nbsp;</font>
+                    </td>
+                </tr>
+                <!-- BEGIN manager -->
+
+
+                <tr>
+                    <td align="right">Домен</td>
+                    <td><input type="text" name="domain" id="domain" value="{DOMAIN}" style="width:102" maxlength="32">
+                    </td>
+                </tr>
+                <!-- END manager -->
+                <tr>
+                    <td align="right">Логин</td>
+                    <td><input type="text" name="uname" value="{LOGIN}" style="width:102" maxlength="32"></td>
+                </tr>
+                <tr>
+                    <td align="right">Пароль</td>
+                    <td><input type="password" name="pass1" value="" style="width:102" maxlength="32"></td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td><input type="image" name=in src="{IMG_URL}in.png" onMouseOver="change_img('in',in_img1)"
+                               onMouseOut="change_img('in',in_img)" alt="Вход в систему" class="null"></td>
+                </tr>
+            </table>
+            <input type="hidden" name="challenge" value="{CHALLENGE}">
+            <input type="hidden" name="response" value="">
+            <input type="hidden" name="umode" value="log">
+            <input type="hidden" name="user_type" value="{USER_TYPE}">
+        </fieldset>
+    </form>
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        if ($("#domain").val() != "") $("#domain").attr("disabled", "true");
+
+    })
+
+    frm_login.pass1.focus();
+
+    document.cookie = "time_sa=0;path=/;";
+    function check(f) {
+
+        if (f.uname.value.length < 1) {
+            alert("Введите Логин");
+            f.uname.focus();
+            return false;
+        } else {
+            if (f.pass1.value.length < 1) {
+                alert("Введите Пароль");
+                f.pass1.focus();
+                return false;
+            } else {
+                f.response.value = (MD5(code_translit_kb(f.uname.value, 0), MD5(code_translit_kb(f.pass1.value, 0)), f.challenge.value));
+                f.pass1.value = "";
+                return true;
+            }
+        }
+    }
+</script>
+
+<!--  END login_form -->
+<!-- BEGIN main -->
+<h2>Добро пожаловать в систему Тур+</h2>
+<div id="main_windgets">
+    <div class="main_widget">
+        <h1>Ближайщие дни рождения</h1>
+        <a href="#" id="birth_today" onclick="getBirthdayInfo('today')">Сегодня</a>
+        <a href="#" id="birth_tomorrow" onclick="getBirthdayInfo('tomorrow')">>Завтра</a>
+        <a href="#" id="birth_aftertommorow" onclick="getBirthdayInfo('aftertomorrow')">>>Послезавтра</a>
+
+        <div id="birthday">
+        </div>
+    </div>
+    <div id="deparure_info" class="main_widget">
+        <h1>Ближайшие вылеты</h1>
+    </div>
+    <div id="arrival_info" class="main_widget">
+        <h1>Ближайщие возвраты</h1>
+    </div>
+    <!-- BEGIN request_info -->
+    <div id="request_info" class="main_widget">
+        <h1>Новый заявки</h1>
+    </div>
+    <!-- END request_info -->
+</div>
+<!--<div id="something">
+    <h1>Здесь может быть что угодно</h1>
+    
+</div>-->
+<!-- END main -->
+<script>
+    function getBirthdayInfo(p_day) {
+
+        $.ajax({
+            url: '{MAIN_URL}admin/info/',
+            type: 'POST',
+            data: {
+                detect: "get_birthday_info",
+                manager_id: '{AUTH_ID}',
+                p_day: p_day
+            },
+            beforeSend: function(xhr){
+                $("#birthday").html("<div class=loading_div>");
+            },
+
+            success: function (msg) {
+                $("#birthday").html("");
+                $("#birthday").append(msg);
+            }
+        });
+    }
+    $(document).ready(function () {
+
+        getBirthdayInfo("today");
+        $.ajax({
+            url: '{MAIN_URL}admin/info/',
+            type: 'POST',
+            data: {
+                detect: "get_deals_info",
+                type: "departure",
+                manager_id: '{AUTH_ID}'
+            },
+             beforeSend: function(xhr){
+                $("#deparure_info").append("<div class=loading_div>");
+            },
+            success: function (msg) {
+                $("#deparure_info .loading_div").remove();
+                $("#deparure_info").append(msg);
+            }
+        });
+        $.ajax({
+            url: '{MAIN_URL}admin/info/',
+            type: 'POST',
+            data: {
+                detect: "get_deals_info",
+                type: "arrival",
+                manager_id: '{AUTH_ID}'
+            },
+             beforeSend: function(xhr){
+                $("#arrival_info").append("<div class=loading_div>");
+            },
+            success: function (msg) {
+                $("#arrival_info .loading_div").remove();
+                $("#arrival_info").append(msg);
+            }
+        });
+        $.ajax({
+            url: '{MAIN_URL}admin/info/',
+            type: 'POST',
+            data: {
+                detect: "GET_REQUEST_INFO",
+
+                manager_id: '{AUTH_ID}'
+            }, 
+            beforeSend: function(xhr){
+              
+                $("#request_info").html("<div class=loading_div>");
+            },
+            success: function (msg) {
+                  $("#request_info .loading_div").remove();
+                $("#request_info").append(msg);
+
+            }
+        });
+    });
+</script>
+
+
+{foot}
+

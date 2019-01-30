@@ -1,0 +1,31 @@
+{head}
+<br>
+<br>
+<table width="100%" cellspacing="10">
+	<tr>
+		<td align="center" class="sz2">
+	<h3 style="color:red;">Адрес ПК КЦ : <a href="{DNSURL}" class="none">https://contact.orient.root.biz</a></h3>
+	<br>
+	<div class="sz00">
+		Автоматический переход на новой адрес через <span id="change_url">5</span> сек.
+	</div>
+		</td>
+	</tr>
+</table>
+<br>
+<br>
+<script type="text/javascript">
+xxx=10;
+usedns();
+function usedns(){
+    document.all('change_url').innerHTML=xxx;
+    if(xxx==0){
+		location.href='{DNSURL}';
+    }
+    xxx=xxx-1;
+    if(xxx>=0){ starttimer('usedns()',3000); }
+}
+
+</script>
+
+{foot}

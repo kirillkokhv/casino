@@ -1,0 +1,336 @@
+{head}
+{main_top}
+<!-- BEGIN salary_div -->
+
+<div style="display: none;">
+    <div class="box-modal" id="salary_div">
+
+    </div>
+</div>
+
+<div id="salary_filters">
+    <img src="{IMG_URL}filter.png" class="filters_img">
+    <submit id="payment_add">Добавить вавыплату</submit>
+    <form id="filters_form" method="POST" action="{MAIN_URL}admin/salary">
+        <table id="filters_table">
+            <tr>
+                <td>
+                    Дата выплаты:
+                </td>
+                <td>
+                    <input type="date" name="f_pay_date_begin" value="{F_PAY_DATE_BEGIN}" class="salary_period dates">
+                    по <input type="date" name="f_pay_date_end" value="{F_PAY_DATE_END}" class="salary_period dates">
+                </td>
+
+            </tr>
+            <tr>
+                <td>
+                    Период оплаты:
+                </td>
+                <td>
+                    <select id="f_pay_period" multiple="multiple" name="f_pay_period[]" class="salary_period">
+                        {PAY_PERIODS}
+                    </select>
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <td>
+                    <input type="hidden" name="detect" value="GET_SALARY_GRID">
+                    <img src="{IMG_URL}search.png" onclick="reload_salary()">
+                    <input type="hidden" name="f_salary_rows_num" id="f_salary_rows_num" value="{F_SALARY_ROWS_NUM}">
+                </td>
+            </tr>
+        </table>
+
+
+    </form>
+
+</div>
+
+<script>
+    $(".salary_period ").on("change", function () {
+
+                if ($(this).attr("id") == "f_pay_period" && $(this).val() != "") {
+                    $(".salary_period .dates").prop('disabled',true);
+                    $("#f_pay_period").prop('disabled',false);
+
+                }
+                else if ($(this).hasClass("dates") && $(this).val() != "") {
+                    $("#f_pay_period").prop('disabled',true);
+                    $(".salary_period .dates").prop('disabled',false);
+
+                }
+                else {
+                    $("#f_pay_period").prop('disabled',false);
+                    $(".salary_period .dates").prop('disabled',false);
+                }
+            }
+        )
+    $("#f_pay_period").selectize();
+    $("#f_manager").selectize();
+    $(document).on("dblclick", ".employees", function () {
+        user_id = $(this).attr("user_id");
+
+        $('#salary_div').arcticmodal({
+            closeOnEsc: false,
+            closeOnOverlayClick: false,
+            afterClose: function(data,el){
+              alert(1);
+            },
+            type: 'ajax',
+            url: '{MAIN_URL}dialogs/salary_edit?detect=EDIT_SALARY&user_id=' + user_id
+            /*afterLoadingOnShow: function (data, el) {
+
+
+             },*/
+        });
+    })
+
+    $(document).on("click", "#pay_add_close", function () {
+        data = $("#payment_form").serialize();
+        $.ajax({
+            type: 'POST',
+            url: '{MAIN_URL}dialogs/payment_add',
+            data: data,
+            success: function () {
+
+            }
+        })
+        $('#salary_div').arcticmodal("close");
+        reload_salary();
+
+    })
+
+
+</script>
+
+<div class="main_form">
+    <div class="page_name">
+        УЧЕТ ЗАРПЛАТ
+    </div>
+    <div class="row_count">
+        <img src="{IMG_URL}row_num.png"><span class="row_count_word">Показать:</span>
+        <input id="row_num1" type="radio" value="10"
+               onclick='$("#f_salary_rows_num").val(this.value); reload_salary()'>
+        <label for="row_num1" title="Вкладка 1">10</label>
+        <input id="row_num2" type="radio" value="20"
+               onclick='$("#f_salary_rows_num").val(this.value); reload_salary()'>
+        <label for="row_num2" title="Вкладка 1">20</label>
+        <input id="row_num3" type="radio" value="50"
+               onclick='$("#f_salary_rows_num").val(this.value); reload_salary()'>
+        <label for="row_num3" title="Вкладка 1">50</label>
+
+
+    </div>
+    <div class="main_table">
+        <table id="salary_table">
+            <thead>
+            <th>
+                ФИО сотрудника
+            </th>
+            <th>
+                Дата приема
+            </th>
+            <th>
+                Оклад
+            </th>
+            <th>
+                Сумма за текущий период
+            </th>
+
+
+            <th></th>
+            </thead>
+            <tbody>
+
+            </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="6"></td>
+                <td class="summary_val" id="client_sum"></td>
+                <td class="summary_val" id="agent_sum"></td>
+                <td class="table_summary" id="profit" colspan="2"></td>
+
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div class="form_footer">
+        <div class="pages_block" id="navigation">
+            {NAVIGATION}
+        </div>
+        <div class="excel">
+            <submit id="delete_selected" onclick="pay_del(0)">Удалить выделенные</submit>
+
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+<div id="dialog-delete" title="УДАЛЕНИЕ ПЛАТЕЖА" style="display: none">
+    <p id="confim_all"><img src="{IMG_URL}warn.png" style="float:left; margin:0 7px 20px 0;">Удалить платеж?</p>
+
+    <p id="confim_selected"><img src="{IMG_URL}warn.png" style="float:left; margin:0 7px 20px 0;">Удалить выделенные
+        платежи?</p>
+    <img src="{IMG_URL}cancel.png" class="cancel">
+    <img src="{IMG_URL}accept.png" class="accept">
+
+
+</div>
+<!-- END salary_div -->
+<script type="text/javascript">
+    $(document).on("click", "#salary_edit_close", function () {
+        data = $("#salary_form").serialize();
+        $.ajax({
+            type: 'POST',
+            url: '{MAIN_URL}dialogs/salary_edit',
+            data: data,
+            success: function () {
+
+                $('#salary_div').arcticmodal("close");
+                reload_salary();
+            }
+        })
+
+
+    });
+    $(document).on("click", ".pages", function (e) {
+        ;
+        e.preventDefault();
+        page = $(this).attr("href").substr(-1, 1);
+        reload_salary(page);
+    });
+
+    $(".cancel").click(function () {
+        $("#dialog-delete").dialog("close");
+    })
+
+    $(".accept").click(function () {
+
+        var selected_pays = new Array();
+        pay_id = $("#dialog-delete").attr("pay_id");
+        if (pay_id == 0) {
+
+            var i = 0;
+            $(".selected_pays:checked").each(function () {
+                selected_pays[i] = $(this).val()
+                i++;
+            });
+
+
+        }
+        var msg = $('#filters_form').serialize();
+        $.ajax({
+            type: 'POST',
+            url: '{MAIN_URL}admin/salary/',
+            data: {
+                detect: "PAY_DELETE_OK",
+                selected_pays: selected_pays,
+
+            },
+            success: function (msg) {
+                //msg = $.parseJSON(msg);
+                $("#pays_table > tbody tr").each(function () {
+                    this.remove();
+                });
+                $("#navigation").html("");
+                $("#pays_table > tbody").append(msg);
+                $("#select_all").prop("checked", false);
+                $(".selected_pays").trigger("change");
+
+            },
+            error: function (xhr, str) {
+                alert('Возникла ошибка: ' + xhr.responseCode);
+            }
+        });
+        $("#dialog-delete").dialog("close");
+        reload_salary();
+    })
+
+
+    function pay_del(pay_id) {
+        if (pay_id > 0) {
+
+            $("#confim_all").show();
+            $("#confim_selected").hide();
+
+        } else {
+            $("#confim_all").hide();
+            $("#confim_selected").show();
+
+        }
+        $("#dialog-delete").attr("pay_id", pay_id);
+        $("#dialog-delete").dialog({
+            resizable: false,
+            width: 370,
+            modal: true,
+
+        });
+
+
+    }
+    function reload_salary(page) {
+        $("#salary_table > tbody tr").each(function () {
+            this.remove();
+        });
+        $("#navigation").html("");
+        var msg = $('#filters_form').serialize();
+
+        if (!page) page = 0;
+        msg += "&p_page_salary=" + page;
+
+
+        $.ajax({
+            type: 'POST',
+            url: '{MAIN_URL}admin/salary',
+            data: msg,
+            success: function (answer) {
+                answer = $.parseJSON(answer);
+                $("#salary_table tbody").append(answer.tbody);
+
+                $("#navigation").append(answer.tfoot);
+
+            }
+        })
+    }
+
+    $(document).on("ready", function () {
+        reload_salary();
+    })
+
+
+    $(document).on("click", "#manager_add", function () {
+        $("#manager_add_div").arcticmodal();
+    })
+    $(document).on("click", "#manager_add_close", function () {
+
+
+        var msg = $('#manager_form').serialize();
+
+        $.ajax({
+            type: 'POST',
+            url: '{MAIN_URL}dialogs/payment_add',
+            data: msg,
+            success: function (answer) {
+                $("#manager_add_div").arcticmodal("close");
+
+                answer = $.parseJSON(answer);
+                $("#employee").append($('<option value="' + answer.manager_id + '">' + answer.fio + '(' + answer.dolg + ')</option>'));
+
+
+            }
+        })
+
+
+    })
+
+</script>
+
+
+{main_bottom}
+{foot}
