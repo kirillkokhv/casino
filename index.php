@@ -45,30 +45,12 @@ if (isset($_SESSION["cook"])) {
 
 ### БД ###
 
-$server = explode(".", $_SERVER["SERVER_NAME"]);
-
-if (count($server) > 1) $db_name = $server[0];
-else $db_name ="";
-
 
 
 if (!isset($db)) {
     $db = new DB_MySQL(array("ShowErr" => IS_ADMIN));
 } else {
     $db->clear();
-}
-
-//$db_name="forpost";
-if ($db_name != "") {
-    $db->query("select * from agency_info where db_name ='" . $db_name . "'");
-    if ($db->next_record()) {
-        $connect_param = array(
-            "Database" => DB_PREFIX . "_" . $db_name,
-            "User" => DB_PREFIX . "_" . $db["db_user"],
-            "Password" => $db["db_pass"],
-        );
-        $auth->auth["agency"]["agency_id"] = $db["agency_id"];
-    }
 }
 
 if (!isset($dbo)) {
@@ -113,173 +95,6 @@ define("URI_URL", MAIN_URL . URI, 0);
 $TITLE = "";
 ### ПРОВЕРКА АВТОРИЗАЦИИ ###
 
-if ($deep1 == "api") {
-
-    set_vars(array("client_card"), TYPE_INT);
-    set_vars(array("dr", "type", "json"), TYPE_STRING);
-    /*  $json = '{
-      "type": "confirmation",
-      "fromUser": {
-          "card": "111222"
-      },
-      "toUser": {
-          "card": "111222",
-          "name": "Иванов"
-      }
-  }';*/
-    $json = base64_decode($json);
-    $data = json_decode($json, true);
-//print_r($data);
-    //$client_card = 100000;
-    if ($data["type"] == "request") {
-        $dbo->query("select * from clients where card_num =" . $data["fromUser"]["card"]);
-        if ($dbo->next_record()) {
-            $dbo->query("select * from clients where card_num=" . $data["toUser"]["card"] . " and lname='" . $data["toUser"]["name"] . "'");
-            if ($dbo->next_record()) {
-                if ($dbo["parent_card_num"] == 100000)
-                    $response["status"] = "success";
-                else {
-                    $response["status"] = "failure";
-                    $response["description"] = "Запрашиваемый клиент уже привязан";
-                }
-            } else {
-                $response["status"] = "failure";
-                $response["description"] = "Не найден клиент запросивший перепривязку";
-            }
-        } else {
-            $response["status"] = "failure";
-            $response["description"] = "Не найден клиент для перепривязки";
-        }
-        $json = json_encode($response);
-//print_r($response);
-        echo $json;
-        exit;
-    }
-    if ($data["type"] == "confirmation") {
-        $dbo->query("select * from clients where card_num =" . $data["fromUser"]["card"]);
-        if ($dbo->next_record()) {
-            $dbo->query("select * from clients where card_num='" . $data["toUser"]["card"] . "' and lname='" . $data["toUser"]["name"] . "'");
-            if ($dbo->next_record()) {
-                if ($dbo["parent_card_num"] == 100000) {
-                    $client_id = $dbo["client_id"];
-                    $dbo->query("update clients set parent_card_num =" . $data["fromUser"]["card"] . " where client_id=" . $client_id);
-                    $response["status"] = "success";
-                } else {
-                    $response["status"] = "failure";
-                    $response["description"] = "Запрашиваемый клиент уже привязан";
-                }
-            } else {
-                $response["status"] = "failure";
-                $response["description"] = "Не найден клиент запросивший перепривязку";
-            }
-        } else {
-            $response["status"] = "failure";
-            $response["description"] = "Не найден клиент для перепривязки";
-        }
-        $json = json_encode($response);
-        //print_r($response);
-        echo $json;
-        exit;
-    }
-    if ($client_card > 0) {
-        if ($dr != "") {
-
-
-            $dbo->query("select * from clients where card_num =" . $client_card . " and birthdate = STR_TO_DATE(  '" . $dr . "', '%d.%m.%Y')");
-            if ($dbo->next_record()) {
-
-
-                $response["waiting_ball"]["sum"] = 0;
-                $response["client_ball"]["sum"] = 0;
-                $dbo->query("SELECT 
-              b.client_id,
-              DATE_FORMAT(b.create_date, '%d.%m.%Y') create_date,
-              SUM(b.balls) balls,
-              b.status_id,
-              dp.deal_id
-             
-            FROM
-              clients_referal_balls b,
-              deals2pays dp,
-              clients c
-            WHERE b.client_id = c.client_id and c.card_num = " . $client_card . " AND b.pay_id = dp.pay_id and b.status_id = 2 
-            GROUP BY DATE_FORMAT(b.create_date, '%d.%m.%Y'),
-              b.client_id,
-              b.status_id,
-              dp.deal_id");
-
-                if ($dbo->num_rows() > 0) {
-                    $response["status"] = "success";
-                    $response["client_card"] = $client_card;
-
-
-                }
-                while ($dbo->next_record()) {
-                    $response["client_ball"][$dbo["deal_id"]]["create_date"] = $dbo["create_date"];
-                    $response["client_ball"][$dbo["deal_id"]]["balls"] = $dbo["balls"];
-                    $response["client_ball"]["sum"] += $dbo["balls"];
-
-                }
-
-                $dbo->query("SELECT 
-              b.client_id,
-              DATE_FORMAT(b.create_date, '%d.%m.%Y') create_date,
-              SUM(b.balls) balls,
-              b.status_id,
-              dp.deal_id,
-              DATE_FORMAT(adddate(b.create_date, interval 2 month), '%d.%m.%Y') apply_date
-            FROM
-              clients_referal_balls b,
-              deals2pays dp,
-              clients c
-            WHERE b.client_id = c.client_id and c.card_num = " . $client_card . " AND b.pay_id = dp.pay_id and b.status_id = 1 
-            GROUP BY DATE_FORMAT(b.create_date, '%d.%m.%Y'),
-              b.client_id,
-              b.status_id,
-              dp.deal_id");
-
-                if ($dbo->num_rows() > 0) {
-                    $response["status"] = "success";
-                    $response["client_card"] = $client_card;
-                    $response["waiting_ball"]["sum"] = 0;
-
-                }
-                while ($dbo->next_record()) {
-                    $response["waiting_ball"][$dbo["deal_id"]]["create_date"] = $dbo["create_date"];
-                    $response["waiting_ball"][$dbo["deal_id"]]["balls"] = $dbo["balls"];
-                    $response["waiting_ball"][$dbo["deal_id"]]["apply_date"] = $dbo["apply_date"];
-                    $response["waiting_ball"]["sum"] += $dbo["balls"];
-
-                }
-
-                getClientTree($client_card, 0, null, 1);
-
-                $referal_json .= "}";
-
-                $response = $response + json_decode($referal_json, true);
-
-                $json = json_encode($response);
-
-                echo $json;
-                // print_r(json_decode(htmlspecialchars_decode($json), true)) ;
-                exit;
-            } else {
-                echo '{
-    "status":"failed","code":"1","description":"Не найден клиент по указанным условиям"}';
-                exit;
-            }
-        } else {
-            echo '{
-    "status":"failed","code":"2","description":"Не указана дата рождения"}';
-            exit;
-        }
-    } else {
-        echo '{
-    "status":"failed","code":"3","description":"Не указан номер карты"}';
-        exit;
-    }
-}
-
 if ($auth->CheckAuth()) {
     if (isset($db))
         $db1 = clone $db;
@@ -311,17 +126,7 @@ if ($auth->CheckAuth()) {
       $deep1="error"; $deep2="403";
       }
       } */
-    $menu_tree = "
-		<li><a href={MAIN_URL}clients/clientlist/>Клиенты </a>
-		<li><a href={MAIN_URL}orders/orderlist/>Сделки </a>
-		<li><a href={MAIN_URL}admin/mails/>Почта </a> 
-		";
-    //if($auth->auth["admin"]==1){
-    $menu_tree .= "
-			<li><a href={MAIN_URL}admin/pay_confirm/>Подтверждение платежей </a>
-			<li><a href={MAIN_URL}admin/hotels/>Справочники</a>
-			<li><a href={MAIN_URL}admin/users/>Пользователи</a>
-			";
+ 
 
     //}
 } else {
@@ -331,75 +136,6 @@ if ($auth->CheckAuth()) {
 #######
 ##### РАЗДЕЛЫ САЙТА
 
-if ($_GET["service"] == "json") {
-    set_time_limit(0);
-    $dbo->query("select * from cities_temp c where not exists(select * from hotels_temp ct where ct.city_id = c.city_id)");
-    //$dbo->query("select * from countries_temp c where not exists(select * from cities_temp ct where ct.country_id = c.country_id)");
-    $i = 0;
-    $cnt = 0;
-    while ($dbo->next_record()) {
-
-
-        $url = file_get_contents("http://module.sletat.ru/Main.svc/GetHotels?countryId=" . $dbo["country_id"] . "&towns=" . $dbo["city_id"] . "&stars=&all=-1");
-
-        $content = json_decode($url, true);
-
-        /*print_r($content["GetCountriesResult"]["Data"]);
-        exit;*/
-        //print_r($content);
-        //exit;
-        /*
-         * Страны
-            foreach ($content["GetCountriesResult"]["Data"] as $key => $countries) {
-
-                if($countries["Id"]>0){
-                    $dbo->query("insert into countries_temp
-                    (country_id, name, isvisa)
-                    values ('" . $countries["Id"] . "','" . $countries["Name"] . "','" . $countries["IsVisa"] . "')");
-
-                }
-
-            }
-            }
-        */
-        /*
-                // Города
-                foreach ($content["GetCitiesResult"]["Data"] as $key => $cities) {
-
-                    if ($cities["Id"] > 0) {
-                        $dbo1->query("insert into cities_temp
-                    (city_id,country_id, name, descriptionurl)
-                    values ('" . $cities["Id"] . "','" . $cities["CountryId"] . "','" . $cities["Name"] . "','" . $countries["DescriptionUrl"] . "')");
-
-                    }
-
-
-                }*/
-        // Отели
-        foreach ($content["GetHotelsResult"]["Data"] as $key => $hotels) {
-
-            if ($hotels["Id"] > 0) {
-
-                $hotel_name = str_replace("'", "", $hotels["Name"]);
-                $dbo1->query("insert into hotels_temp
-(hotel_id, city_id, country_id, name, beach_line, stars)
-            values('" . $hotels["Id"] . "', '" . $hotels["TownId"] . "', '" . $dbo["country_id"] . "', '" . $hotel_name . "', '" . $hotels["BeachLineId"] . "', '" . $hotels["StarId"] . "')");
-
-            }
-
-
-        }
-        $cnt++;
-        echo $cnt;
-        $i++;
-        if ($i == 100) header("Location: http://turnd/?service=json");
-
-
-    }
-
-
-    exit;
-}
 
 
 if (!isset($auth->auth["attr"]["service_id"]))
@@ -435,6 +171,12 @@ if($auth->CheckAuth()){
         case "close":  //закрываем страницу
             define("MODULE", "close");
             break;
+
+        case "monitoring":  //закрываем страницу
+            define("MODULE", "pages/monitoring");
+            break;
+
+
 
 
         case "tasks":
@@ -672,6 +414,20 @@ if (is_array($ERROR_GLOBAL) && !empty($ERROR_GLOBAL)) {
 if (is_array($ERROR_PHP) && !empty($ERROR_PHP) && IS_ADMIN) {
     $p->set_block("head", "php_errors");
     $p->set_var("ERROR_PHP", preg_replace("/[\n\t\r]+/", " ", implode("", $ERROR_PHP)));
+}
+if ($auth->CheckAuth()) {
+   
+    $new_mails = 0;
+    $active_tasks = 0;
+
+    $p->set_var(array(
+                    "USER_FIO" => $auth->auth["fio"],
+                    "USER_AVATAR" => $auth->auth["avatar"],
+                    "NEW_MAILS" => $new_mails,
+                    "ACTIVE_TASKS" => $active_tasks,
+
+                ));
+
 }
 
 //ЗАПИСЬ ПОСЕЩЕННОЙ СТРАНИЦЫ

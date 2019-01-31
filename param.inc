@@ -1,6 +1,7 @@
 <?php
 ### Описание базы данных ###
 setlocale(LC_CTYPE, 'ru_RU.CP1251', 'rus_RUS.CP1251', 'Russian_Russia.1251');
+//setlocale(LC_ALL, "en_US.UTF-8");
 
 class DB_Info implements ArrayAccess
 {
@@ -49,10 +50,6 @@ class DB_Info implements ArrayAccess
 
 $DB = new DB_Info;
 
-$DB_name = explode(".", $_SERVER["SERVER_NAME"]);
-
-$crm_account = $DB_name = $DB_name[0] == "tur1" ? "tur" : $DB_name[0];
-//
 
 
 if (stristr($_SERVER["SERVER_NAME"], "crmtourism.ru")) {
@@ -62,7 +59,7 @@ if (stristr($_SERVER["SERVER_NAME"], "crmtourism.ru")) {
 else {
 
     $www = "www";
-    $mdb = "tur";
+    $mdb = "";
 }
 
 if (!empty($_SERVER["SERVER_NAME"])) {
@@ -163,5 +160,62 @@ $FILE_TYPES = array(
     "application/vnd.oasis.opendocument.spreadsheet"  => array("compress" => 5, "ico" => "excel.ico", "ext" => ".ods"),
     "application/vnd.oasis.opendocument.text"         => array("compress" => 5, "ico" => "word.ico", "ext" => ".odt"),
 );
+
+$english = array (
+    "title" =>  "Admin panel",
+    "dashboard" => "Dashboard",
+    "menu" => "Menu",
+    "administration" => "Administration",
+    "players" => "Players",
+    "players_online" => "Online",
+    "payments" => "Payments",
+    "support" => "Support taks",
+    "bets_header" => "Bet per day",
+    "games_header" => "Game",
+    "monitoring_header" => "Monitoring",
+    "monitoring_subheader" => "Monitoring",
+    "monitoring_uid" => "UID",
+    "monitoring_login" => "Login",
+    "monitoring_balls" => "Balls",
+    "monitoring_status" => "Status",
+    "monitoring_last_pay" => "Last pay",
+    "monitoring_rating" => "Player rating",
+    "monitoring_ip" => "IP",
+    "refresh_button" => "Refresh now",
+    "autorefresh" => "Autorefresh",
+    "players_buttons" => "Players",
+    
+
+
+
+);
+
+$russian = array (
+    "title" =>  "Админ панель",
+    "dashboard" =>  "Рабочий стол",
+    "menu" => "Меню",
+    "administration" => "Администрирование",
+    "players" => "Кол-во игроков",
+    "players_online" => "Игроков онлайн",
+    "payments" => "Платежи",
+    "support" => "Запросы в поддержку",
+    "bets_header" => "Ставки за день",
+    "games_header" => "Игра",
+    "monitoring_header" => "Мониторинг",
+    "monitoring_subheader" => "Мониторинг",
+    "monitoring_uid" => "UID",
+    "monitoring_login" => "Логин",
+    "monitoring_balls" => "Баллы",
+    "monitoring_status" => "Статус",
+    "monitoring_last_pay" => "Последний платеж",
+    "monitoring_rating" => "Рейтинг",
+    "monitoring_ip" => "IP",
+    "refresh_button" => "Обновить сейчас",
+    "autorefresh" => "Автообновление",
+    "players_buttons" => "Игроки",
+    
+
+);
+$lang = $english;
 
 ?>
